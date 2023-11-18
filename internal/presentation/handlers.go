@@ -37,7 +37,7 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	r.Header.Add("Authorization", tokenString)
+	w.Header().Set("Authorization", tokenString)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -63,7 +63,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.Header.Add("Authorization", tokenString)
+	w.Header().Set("Authorization", tokenString)
 	w.WriteHeader(http.StatusOK)
 }
 
