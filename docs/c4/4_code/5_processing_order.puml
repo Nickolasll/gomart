@@ -1,0 +1,67 @@
+@startuml
+!theme vibrant
+title: 5. Обработка загруженного заказа
+skinparam maxMessageSize 300
+autonumber
+
+box "Накопительная система лояльности" #d3f3fa
+participant "Сервис заказов" as order
+participant "Обработчик заказов" as worker
+queue "Канал" as queue
+database "postgres" as db
+participant "AccrualClient" as accrual_client
+end box
+
+participant "Система расчёта баллов лояльности" as accrual
+
+activate order
+activate worker
+worker -> queue ++ : Ждет появления заказа
+order -> queue: Помещает заказ в очередь для обработки
+deactivate order
+queue --> worker: Заказ
+deactivate queue
+worker -> accrual_client ++ : Запрашивает статус обработки заказа
+accrual_client -> accrual ++ : Выполняет запрос
+note over accrual
+    GET /api/orders/{number} HTTP/1.1 
+end note
+return Ответ на запрос
+note over accrual_client
+  200 OK HTTP/1.1
+  Content-Type: application/json
+  
+  {
+      "order": "<number>",
+      "status": "PROCESSED",
+      "accrual": 500
+  }
+end note   
+accrual_client -> accrual_client: Анализ статус ответа
+alt HTTP 200 Ok
+    accrual_client --> worker : Информация о заказе
+    worker -> worker: Анализ статуса заказа
+    alt status = PROCESSED
+        worker -> db ++ : Обновление состояния заказа и счета пользователя
+        deactivate db
+    else status = INVALID
+        worker -> db ++ : Обновление состояния заказа
+        deactivate db
+    else status = REGISTERED или status = PROCESSING
+        worker -> db ++ : Обновление состояния заказа
+        deactivate db
+        worker -> queue ++ : Помещает заказ в конец очереди
+        deactivate queue
+    end
+else HTTP 204 no content
+    accrual_client --> worker : Ошибка: Заказ отсуствует
+    worker -> db ++ : Обновление заказа - status = INVALID
+    deactivate db
+else HTTP > 204
+    accrual_client --> worker : Ошибка: Заказ не готов
+    deactivate accrual_client
+    worker -> queue ++ : Помещает заказ в конец очереди
+    deactivate queue
+    worker -> worker: sleep 1sec
+end
+@enduml

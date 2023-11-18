@@ -1,0 +1,272 @@
+openapi: 3.0.3
+info:
+  title: Накопительная система лояльности «Гофермарт»
+  description: |-
+    Система представляет собой HTTP API со следующими требованиями к бизнес-логике:
+    - регистрация, аутентификация и авторизация пользователей;
+    - приём номеров заказов от зарегистрированных пользователей;
+    - учёт и ведение списка переданных номеров заказов зарегистрированного пользователя;
+    - учёт и ведение накопительного счёта зарегистрированного пользователя;
+    - проверка принятых номеров заказов через систему расчёта баллов лояльности;
+    - начисление за каждый подходящий номер заказа положенного вознаграждения на счёт лояльности пользователя.
+  version: 0.0.1
+servers:
+  - url: http://localhost/api/user
+tags:
+  - name: auth
+    description: Регистрация и авторизация пользователей
+  - name: orders
+    description: Операции с заказами
+  - name: balance
+    description: Операции с балансом счета пользователя
+paths:
+  /register:
+    post:
+      tags:
+        - auth
+      summary: Регистрация пользователя
+      description: Регистрирует нового пользователя в системе лояльности и аутентифицирует его.
+      operationId: registerUser
+      requestBody:
+        description: Логин и пароль
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description: Пользователь успешно зарегистрирован и аутентифицирован
+          headers:
+            Authorization:
+              schema:
+                $ref: '#/components/schemas/Auth'
+              description: JWT
+        '400':
+          description: Неверный формат запроса
+        '409':
+          description: Логин уже занят
+        '500':
+          description: Внутренняя ошибка сервера
+  /login:
+    post:
+      tags:
+        - auth
+      summary: Авторизация пользователя
+      description: Авторизует пользователя по логину и паролю
+      operationId: loginUser
+      requestBody:
+        description: Логин и пароль
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description: Пользователь успешно аутентифицирован
+          headers:
+            Authorization:
+              schema:
+                 $ref: '#/components/schemas/Auth'
+              description: JWT
+        '400':
+          description: Неверный формат запроса
+        '401':
+          description: Неверная пара логин/пароль
+        '500':
+          description: Внутренняя ошибка сервера
+  /orders:
+    post:
+      tags:
+        - orders
+      summary: Загрузка номера заказа
+      description: Загрузка пользователем номера заказа для расчёта
+      operationId: postOrders
+      requestBody:
+        description: Created user object
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: "12345678903"
+      responses:
+        '200':
+          description: Заказ уже был загружен этим пользователем
+        '202':
+          description: Принято на обработку
+        '400':
+          description: Неверный формат запроса
+        '401':
+          description: Пользователь не аутентифицирован
+        '409':
+          description: Номер заказа уже был загружен другим пользователем
+        '422':
+          description: Неверный формат номера заказа
+        '500':
+          description: Внутренняя ошибка сервера
+      security:
+        - Bearer: []
+    get:
+      tags:
+        - orders
+      summary: Получение списка заказов
+      description: Получение списка загруженных пользователем номеров заказов, статусов их обработки и информации о начислениях
+      operationId: getOrders
+      responses:
+        '200':
+          description: Успешная обработка запроса
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'  
+        '204':
+          description: Нет данных для ответа
+        '401':
+          description: Пользователь не аутентифицирован
+        '500':
+          description: Внутренняя ошибка сервера
+      security:
+        - Bearer: []
+  /balance:
+    get:
+      tags:
+        - balance
+      summary: Получение баланса счета
+      description: Получение текущего баланса счёта баллов лояльности пользователя
+      operationId: getBalance
+      responses:
+        '200':
+          description: Успешная обработка запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'  
+        '401':
+          description: Пользователь не аутентифицирован
+        '500':
+          description: Внутренняя ошибка сервера
+      security:
+        - Bearer: []
+  /balance/withdraw:
+    post:
+      tags:
+        - balance
+      summary: Списание средств со счета
+      description: Запрос на списание баллов с накопительного счёта в счёт оплаты нового заказа
+      operationId: withdrawBalance
+      requestBody:
+        description: Номер заказа и количество баллов
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  type: string
+                  example: 2377225624
+                sum:
+                  type: integer
+                  example: 751
+      responses:
+        '200':
+          description: Успешная обработка запроса
+        '401':
+          description: Пользователь не аутентифицирован
+        '402':
+          description: На счету недостаточно средств
+        '422':
+          description: Неверный номер заказа
+        '500':
+          description: Внутренняя ошибка сервера
+      security:
+        - Bearer: []
+  /withdraws:
+    get:
+      tags:
+        - balance
+      summary: Получение информации о выводе средств
+      description: Получение информации о выводе средств с накопительного счёта пользователем
+      operationId: getWithdraws
+      responses:
+        '200':
+          description: Успешная обработка запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Withdraw'  
+        '204':
+          description: Нет ни одного списания
+        '401':
+          description: Пользователь не аутентифицирован
+        '500':
+          description: Внутренняя ошибка сервера
+      security:
+        - Bearer: []
+components:
+  schemas:
+    Credentials:
+      type: object
+      properties:
+        login:
+          type: string
+          example: login
+        password:
+          type: string
+          example: password
+    Auth:
+      type: string
+      example: "Bearer token"
+    Order:
+      type: object
+      properties:
+        number:
+          type: string
+          example: "9278923470"
+        status:
+          type: string
+          example: "PROCESSED"
+        accrual:
+          type: integer
+          example: 500
+        uploaded_at:
+          type: string
+          format: date-time
+          example: "2020-12-10T15:15:45+03:00"
+    Balance:
+      type: object
+      properties:
+        current: 
+          type: number
+          format: double
+          example: 500.5
+        withdrawn:
+          type: integer
+          example: 42
+    Withdraw:
+      type: object
+      properties:
+        order:
+          type: string
+          example: 2377225624
+        sum:
+          type: integer
+          example: 500
+        processed_at:
+          type: string
+          format: date-time
+          example: "2020-12-09T16:09:57+03:00"
+  requestBodies:
+    Credentials:
+      description: Pet object that needs to be added to the store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Credentials'
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+      description: >-
+        Введите токен с префиксом `Bearer: `, т.е. "Bearer abcde12345".

@@ -1,0 +1,80 @@
+@startuml
+!theme vibrant
+title: 10. Диаграмма классов
+
+namespace application {
+    namespace services {}
+}
+
+namespace domain {
+    namespace entities {}
+    namespace aggregates {}
+    namespace repositories {}
+}
+
+class application.services.JOSEService {
+    + void IssueToken(userId : UUID) : String
+    + void ParseUserID(token: String) : String
+    + void Hash(password: String) : String
+    + void VerifyPassword(hashedPassword: String, currPassword: String) : Bool
+}
+
+class domain.repositories.UserAggregateRepositoryInterface {
+    + void Init()
+    + void Create(login : String, password : String) : null
+    + void Get(id : UUID) : UserAggregate | null
+    + void Save(user : UserAggregate) : null
+    + void GetByLogin(login: String) : UserAggregate | null
+}
+
+class domain.repositories.BalanceRepositoryInterface {
+    + void Get(userId : UUID) : Balance
+}
+
+class domain.repositories.OrderRepositoryInterface {
+    + void Get(number : String) : Order | null
+    + void GetAll(userId : UUID) : Order[]
+}
+
+class domain.repositories.WithdrawRepositoryInterface {
+    + void GetAll(userId : UUID) : Withdraw[]
+}
+
+class domain.aggregates.UserAggregate {
+    + Id : UUID
+    + Login : String
+    + Password : String
+    - Balance : Balance
+    + Orders : map[string]Order
+    + Withdrawls : map[string]Withdraw
+    + void AddOrder(number : String)
+    + void UpdateOrder(number: String, status: String, accrual: Decimal)
+    + void AddWithdraw(order : String, sum : Decimal)
+}
+
+class domain.entities.Balance {
+    - UserId: UUID
+    + Current : Decimal
+    + Withdraw : Decimal
+}
+
+class domain.entities.Order {
+    + Number : String
+    - UserId: UUID
+    - Status : String
+    - Accrual : Decimal
+    - UploadedAt: DateTime
+    + vold Update(status : String, accrual : Decimal)
+}
+
+class domain.entities.Withdraw {
+    + Order : String
+    - UserId: UUID
+    - Sum : Decimal
+    - ProcessedAt : DateTime 
+}
+
+domain.aggregates.UserAggregate "1" o-- "1" domain.entities.Balance
+domain.aggregates.UserAggregate "1" o-- "*" domain.entities.Order
+domain.aggregates.UserAggregate "1" o-- "*" domain.entities.Withdraw
+@enduml

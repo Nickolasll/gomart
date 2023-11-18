@@ -1,0 +1,64 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+skinparam wrapWidth 300
+LAYOUT_WITH_LEGEND()
+LAYOUT_LANDSCAPE()
+
+title
+    <b>[Component] API системы лояльности «Гофермарт»</b>
+end title
+
+Person(user, "Пользователь", "Клиент интернет-магазина «Гофермарт»")
+
+System_Boundary(loyalty_api, "API системы лояльности «Гофермарт»") {
+    Container(jose, "Служба JavaScript Object Signing and Encryption", "Component: Go 1.21.0", "Выпуск JWT, валидация JWT, верификация паролей")
+    Container(worker, "Обработчик заказов", "Component: Go 1.21.0", "Получение информации о заказах из системы рассчета баллов, обновление состояния зказа")
+    ContainerDb(channel, "Очередь", "Component: Go 1.21.0, channel", "Хранит заказы, по которым необходимо получить бонусные баллы")
+    Container(authentication, "Аутентификация пользователей", "Component: Go 1.21.0", "Выполняет поиск пользователя и аутентификацию")
+    Container(registration, "Регистрация пользователей", "Component: Go 1.21.0", "Регистрирует нового пользователя")
+    Container(orders_getter, "Получение списка заказов", "Component: Go 1.21.0", "Чтение списка зарегистрированных заказов")
+    Container(orders_register, "Регистрация нового заказа", "Component: Go 1.21.0", "Загрузка номера заказа в систему лояльности для начисления баллов")
+    Container(balance, "Счет пользователя", "Go 1.21.0", "Выдача информации о текущем состоянии счета")
+    Container(get_withdrawls, "Получение списка списаний", "Go 1.21.0", "Выдача информации о списаниях со счета пользователя")
+    Container(withdraw_register, "Регистрация списания средств", "Go 1.21.0", "Списание средств с бонусного счета пользователя")
+}
+
+ContainerDb(db, "База данных", "postgres", "Хранит активные токены пользователей, баланса пользователей, информации о заказах и историю зачислений/списаний")
+
+System_Ext(shop, "Интернет-магазин «Гофермарт»", "Площадка на которой совершаются покупки")
+System_Ext(accrual, "Система расчетов баллов лояльности", "Рассчет бонусных баллов по заказу из интернет-магазина «Гофермарт»")
+
+Rel(user, authentication, "Отправляет запрос на аутентификацию", "HTTP")
+Rel_Left(authentication, jose, "Верификация пароля, выпуск JWT")
+Rel(authentication, db, "Чтение и запись данных", "SQL/TCP"))
+
+Rel(user, registration, "Отправляет запрос на регистрацию", "HTTP")
+Rel(registration, jose, "Хеширование пароля, выпуск JWT")
+Rel(registration, db, "Чтение и запись данных", "SQL/TCP"))
+
+Rel(user, orders_register, "Отправляет запрос на регистрацию нового заказа", "HTTP")
+Rel_Left(orders_register, channel, "Добавляет заказ для обработки", "Go")
+Rel(orders_register, db, "Чтение и запись данных", "SQL/TCP"))
+
+Rel(worker, channel, "Получает заказ для обработки", "Go")
+Rel(worker, accrual, "Запрашивает информацию о баллах за заказ", HTTP)
+
+Rel(user, balance, "Отправляет запрос на получение информации о средствах на счету", "HTTP")
+Rel(balance, db, "Чтение и запись данных", "SQL/TCP"))
+
+Rel(user, orders_getter, "Отправляет запрос на получение информации о загруженных заказах", "HTTP")
+Rel(orders_getter, db, "Чтение и запись данных", "SQL/TCP"))
+
+Rel_Up(user, shop, "Совершает покупку", "HTTP")
+Rel_Up(shop, accrual, "Передает информацию о заказе", "HTTP")
+
+Rel(authentication, db, "Чтение и запись данных", "SQL/TCP"))
+Rel(worker, db, "Чтение и запись данных", "SQL/TCP")
+
+Rel(user, get_withdrawls, "Отправляет запрос на получение информации о списаниях", "HTTP")
+Rel(get_withdrawls, db, "Чтение и запись данных", "SQL/TCP"))
+
+Rel_Left(shop, withdraw_register, "Запрашивает списание средств", "HTTP")
+Rel(withdraw_register, db, "Чтение и запись данных", "SQL/TCP"))
+@enduml

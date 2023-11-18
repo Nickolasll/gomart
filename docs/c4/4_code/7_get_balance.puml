@@ -1,0 +1,36 @@
+@startuml
+!theme vibrant
+title: 7. Получение текущего баланса пользователя
+skinparam maxMessageSize 300
+autonumber
+
+participant "Клиент" as client
+participant "Обработчик запроса" as handler
+participant "Сервис счета баллов лояльности" as balance
+database "postgres" as db
+
+client -> handler ++ : Отправляет запрос на получение текущего баланса
+note over client, handler
+    GET /api/user/orders HTTP/1.1
+end note
+
+group middleware
+note over client, handler: 3. Авторизация пользователя
+end group
+
+handler -> balance ++ : Вызывает поведение чтения баланса по идентификатору пользователя
+balance -> db ++ : Запрашивает баланс пользователя
+return результат запроса
+return Баланс пользователя
+handler --> handler: Дамп баланса в JSON
+return HTTP 200 Ok
+note over client, handler
+    200 OK HTTP/1.1
+    Content-Type: application/json
+
+    {
+        "current": 500.5,
+        "withdrawn": 42
+    }
+end note
+@enduml

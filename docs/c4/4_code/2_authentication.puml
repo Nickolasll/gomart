@@ -1,0 +1,54 @@
+@startuml
+!theme vibrant
+title: 2. Аутентификация пользователя
+skinparam maxMessageSize 300
+autonumber
+
+participant "Клиент" as client
+participant "Обработчик запроса" as handler
+participant "Юзкейз аутентификации" as auth
+participant "Служба JavaScript Object Signing and Encryption" as jose
+
+database "postgres" as db
+
+client -> handler ++ : Отправляет запрос на аутентификацию по логину и паролю
+note over client, handler
+    POST /api/user/login HTTP/1.1
+    Content-Type: application/json
+
+    login: login
+    password: password   
+end note
+
+handler -> handler : Парсит JSON и валидирует формат входных данных из тела запроса
+opt Формат некорректен
+    handler --> client: HTTP 400 bad request
+end
+
+handler -> auth ++ : Вызывает поведение аутентификации по логину и паролю
+auth -> db ++ : Поиск пользователя по логину
+return Результат запроса
+auth -> auth: Проверка результата запроса
+opt Результат запроса = null
+    auth --> handler: Пользователь не найден
+    handler --> client: HTTP 401 Unauthorized
+end
+
+auth -> jose ++: Проверка пароля на соответствие
+return результат проверки
+opt Неправильный пароль
+    auth --> handler: Неправильный пароль
+    handler --> client: HTTP 401 Unauthorized
+end
+    
+auth -> jose ++: Генерация JWT с уникальным идентификатором пользователя
+return JWT
+return JWT
+
+handler -> handler: Устанавливает JWT в HTTP-заголовок Authorization
+return HTTP 200 Ok
+note over client, handler
+    200 OK HTTP/1.1
+    Authorization: Bearer ...  
+end note
+@enduml
