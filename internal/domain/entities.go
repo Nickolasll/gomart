@@ -39,4 +39,8 @@ func (o Order) SetAccrual(value string) Order {
 }
 
 type Withdraw struct {
+	Order           string    `gorm:"primaryKey"`
+	UserAggregateID uuid.UUID `gorm:"type:uuid"`
+	Sum             int
+	ProcessedAt     time.Time
 }
