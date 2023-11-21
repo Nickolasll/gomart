@@ -50,9 +50,9 @@ func (u UserAggregate) AddWithdraw(number string, sum float32) (UserAggregate, e
 		ProcessedAt:     time.Now(),
 	}
 	withdraw = withdraw.SetSum(sum)
-	if u.Balance.Current < withdraw.Sum {
-		return u, ErrInsufficientFunds
-	}
+	// if u.Balance.Current < withdraw.Sum {
+	// 	return u, ErrInsufficientFunds
+	// }
 	u.Withdrawals = append(u.Withdrawals, withdraw)
 	u.Balance.Current -= withdraw.Sum
 	u.Balance.Withdraw += withdraw.Sum
