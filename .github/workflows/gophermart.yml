@@ -34,7 +34,7 @@ jobs:
         uses: robinraju/release-downloader@v1.8
         with:
           repository: Yandex-Practicum/go-autotests
-          tag: "v0.10.2"
+          tag: "latest"
           fileName: "*"
           out-file-path: .tools
 
