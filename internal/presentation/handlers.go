@@ -122,6 +122,7 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) 
 		log.Info(err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
@@ -143,6 +144,7 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID)
 		log.Info(err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
@@ -202,6 +204,7 @@ func GetWithdrawalsHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 		log.Info(err)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
