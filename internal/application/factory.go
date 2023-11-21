@@ -26,6 +26,10 @@ func CreateApplication(DB gorm.DB, jose JOSEService, url string, log *logrus.Log
 	orderRepository := infrastructure.OrderRepository{DB: DB}
 	balanceRepository := infrastructure.BalanceRepository{DB: DB}
 	withdrawRepository := infrastructure.WithdrawRepository{DB: DB}
+	accrualClient := infrastructure.AccrualClient{
+		URL: url,
+		Log: log,
+	}
 	userAggregateRepository.Init()
 	registrationUseCase := Registration{
 		userAggregateRepository: userAggregateRepository,
@@ -65,7 +69,7 @@ func CreateApplication(DB gorm.DB, jose JOSEService, url string, log *logrus.Log
 	}
 	processingOrderUseCase := ProcessingOrder{
 		userAggregateRepository: userAggregateRepository,
-		accrualClient:           infrastructure.AccrualClient{URL: url},
+		accrualClient:           accrualClient,
 	}
 	worker := Worker{
 		ProcessingOrderUseCase: processingOrderUseCase,
