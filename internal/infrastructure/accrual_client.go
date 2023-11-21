@@ -18,7 +18,7 @@ func (c AccrualClient) GetOrderStatus(number string) (domain.AccrualOrderRespons
 	c.Log.Info("requesting for: " + number)
 	var accrualResponse domain.AccrualOrderResponse
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", c.URL+"/"+number, nil)
+	req, err := http.NewRequest("GET", c.URL+"/api/orders/"+number, nil)
 	if err != nil {
 		c.Log.Info("new request error " + err.Error())
 		return accrualResponse, err
