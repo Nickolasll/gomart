@@ -36,6 +36,20 @@ opt Номер заказа невалиден
     handler --> client: HTTP 422 Unprocessable entity
 end
 
+balance -> db ++ : Запрашивает списание с полученным номером
+return результат запроса
+
+balance -> balance: Проверка результата запроса
+opt Результат запроса != null
+    alt идентификатор пользователя из списания совпадает
+        balance --> handler: Пользователь уже зарегистрировал это списание
+        handler --> client: HTTP 200 Ok
+    else идентификатор пользователя не совпадает
+        balance --> handler: Списание уже было загружен одругим пользователем
+        handler --> client: HTTP 409 Conflict
+    end
+end
+
 balance -> db ++ : Запрашивает баланс пользователя
 return результат запроса
 balance -> balance: Сравнивает баланс пользователя с суммой списания
@@ -46,5 +60,5 @@ end
     balance -> db ++ : Сохранение нового списания со средств и обновление счета пользователя
     deactivate db
 return Успешно списано
-return HTTP 200 Ok
+return HTTP 202 Accepted
 @enduml

@@ -7,7 +7,7 @@ import (
 )
 
 type Balance struct {
-	UserAggregateID uuid.UUID `gorm:"type:uuid"`
+	UserAggregateID uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Current         int
 	Withdraw        int
 }
@@ -43,4 +43,14 @@ type Withdraw struct {
 	UserAggregateID uuid.UUID `gorm:"type:uuid"`
 	Sum             int
 	ProcessedAt     time.Time
+}
+
+func (w Withdraw) SetSum(value string) Withdraw {
+	intValue := StringToMonetary(value)
+	w.Sum = intValue
+	return w
+}
+
+func (w Withdraw) SumToString() string {
+	return MonetaryToString(w.Sum)
 }

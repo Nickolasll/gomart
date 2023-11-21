@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/Nickolasll/gomart/internal/presentation"
 )
@@ -16,4 +17,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	os.Exit(presentation.AtExit())
 }

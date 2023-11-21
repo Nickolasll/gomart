@@ -13,22 +13,36 @@ type UserAggregateRepository struct {
 }
 
 func (u UserAggregateRepository) Init() {
-	u.DB.AutoMigrate(&domain.UserAggregate{})
-	u.DB.AutoMigrate(&domain.Order{})
+	u.DB.AutoMigrate(
+		&domain.UserAggregate{},
+		&domain.Order{},
+		&domain.Balance{},
+		&domain.Withdraw{},
+	)
 }
 
 func (u UserAggregateRepository) Create(login string, password string) (domain.UserAggregate, error) {
-	var user = domain.UserAggregate{ID: uuid.New(), Login: login, Password: password}
-	res := u.DB.Create(&user)
-	if res.Error != nil {
-		return user, res.Error
+	userID := uuid.New()
+	user := domain.UserAggregate{
+		ID:       userID,
+		Login:    login,
+		Password: password,
+		Balance:  domain.Balance{UserAggregateID: userID, Current: 0, Withdraw: 0},
+	}
+	err := u.DB.Create(&user).Error
+	if err != nil {
+		return user, err
+	}
+	err = u.DB.Save(&user).Error
+	if err != nil {
+		return user, err
 	}
 	return user, nil
 }
 
 func (u UserAggregateRepository) Get(ID uuid.UUID) (domain.UserAggregate, error) {
 	var user domain.UserAggregate
-	err := u.DB.First(&user, ID).Error
+	err := u.DB.Preload("Balance").Preload("Orders").Preload("Withdrawals").First(&user, ID).Error
 	if err != nil {
 		return user, err
 	}

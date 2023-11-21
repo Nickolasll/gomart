@@ -9,6 +9,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var log = logrus.New()
@@ -21,7 +22,9 @@ func ChiFactory() (*chi.Mux, error) {
 	if err != nil {
 		return nil, err
 	}
-	db, err = gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), &gorm.Config{})
+	db, err = gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -37,5 +40,14 @@ func ChiFactory() (*chi.Mux, error) {
 	router.Post("/api/user/register", RegistrationHandler)
 	router.Post("/api/user/login", LoginHandler)
 	router.Post("/api/user/orders", auth(UploadOrderHandler))
+	router.Get("/api/user/orders", auth(GetOrdersHandler))
+	router.Get("/api/user/balance", auth(GetBalanceHandler))
+	router.Post("/api/user/balance/withdraw", auth(UploadWithdrawHandler))
+	router.Get("/api/user/withdrawals", auth(GetWithdrawalsHandler))
 	return router, err
+}
+
+func AtExit() int {
+	app.ShutDown()
+	return 0
 }

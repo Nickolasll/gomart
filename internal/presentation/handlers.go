@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/Nickolasll/gomart/internal/application"
+	"github.com/Nickolasll/gomart/internal/domain"
 	"github.com/google/uuid"
 )
 
@@ -30,11 +31,11 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, application.ErrLoginAlreadyInUse) {
 			w.WriteHeader(http.StatusConflict)
-			return
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			return
+			log.Info(err)
 		}
+		return
 	}
 
 	w.Header().Set("Authorization", tokenString)
@@ -59,6 +60,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Info(err)
 		}
 		return
 	}
@@ -77,14 +79,129 @@ func UploadOrderHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID
 	if err != nil {
 		if errors.Is(err, application.ErrNotValidNumber) {
 			w.WriteHeader(http.StatusUnprocessableEntity)
-		} else if errors.Is(err, application.ErrOrderUploadedByThisUser) {
+		} else if errors.Is(err, application.ErrUploadedByThisUser) {
 			w.WriteHeader(http.StatusOK)
-		} else if errors.Is(err, application.ErrOrderUploadedByAnotherUser) {
+		} else if errors.Is(err, application.ErrUploadedByAnotherUser) {
 			w.WriteHeader(http.StatusConflict)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Info(err)
 		}
 		return
 	}
 	w.WriteHeader(http.StatusAccepted)
+}
+
+func GetOrdersHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
+	orders, err := app.UseCases.GetOrders.Execute(UserID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Info(err)
+		return
+	}
+	if len(orders) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	ordersResponse := []OrderResponse{}
+	for _, order := range orders {
+
+		orderResponse := OrderResponse{
+			Number:     order.Number,
+			Status:     order.Status,
+			UploadedAt: order.UploadedAt,
+		}
+		if orderResponse.Status == domain.StatusProcessed {
+			orderResponse.Accrual = order.AccrualToString()
+		}
+		ordersResponse = append(ordersResponse, orderResponse)
+	}
+	resp, err := json.Marshal(ordersResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Info(err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+}
+
+func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
+	balance, err := app.UseCases.GetBalance.Execute(UserID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Info(err)
+		return
+	}
+	balanceResponse := BalanceResponse{
+		Current:  balance.CurrentToString(),
+		Withdraw: balance.WithdrawToString(),
+	}
+	resp, err := json.Marshal(balanceResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Info(err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+}
+
+func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
+	var requestPayload UploadWithdrawPayload
+	body, _ := io.ReadAll(r.Body)
+	err := json.Unmarshal(body, &requestPayload)
+	if err != nil || requestPayload.Number == "" || requestPayload.Sum == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = app.UseCases.UploadWithdraw.Execute(UserID, requestPayload.Number, requestPayload.Sum)
+	if err != nil {
+		if errors.Is(err, application.ErrNotValidNumber) {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+		} else if errors.Is(err, application.ErrUploadedByThisUser) {
+			w.WriteHeader(http.StatusOK)
+		} else if errors.Is(err, application.ErrUploadedByAnotherUser) {
+			w.WriteHeader(http.StatusConflict)
+		} else if errors.Is(err, domain.ErrInsufficientFunds) {
+			w.WriteHeader(http.StatusPaymentRequired)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Info(err)
+		}
+		return
+	}
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func GetWithdrawalsHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
+	withdrawals, err := app.UseCases.GetWithdrawals.Execute(UserID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Info(err)
+		return
+	}
+	if len(withdrawals) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	withdrawalsResponse := []WithdrawalsResponse{}
+	for _, withdraw := range withdrawals {
+
+		withdrawResponse := WithdrawalsResponse{
+			Order:       withdraw.Order,
+			Sum:         withdraw.SumToString(),
+			ProcessedAt: withdraw.ProcessedAt,
+		}
+
+		withdrawalsResponse = append(withdrawalsResponse, withdrawResponse)
+	}
+	resp, err := json.Marshal(withdrawalsResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Info(err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
 }

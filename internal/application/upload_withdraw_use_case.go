@@ -1,30 +1,26 @@
 package application
 
 import (
-	"sync"
-
 	"github.com/Nickolasll/gomart/internal/domain"
 	"github.com/google/uuid"
 )
 
-type UploadOrder struct {
-	orderRepository         domain.OrderRepositoryInterface
+type UploadWithdraw struct {
+	withdrawRepository      domain.WithdrawRepositoryInterface
 	userAggregateRepository domain.UserAggregateRepositoryInterface
-	ch                      chan<- domain.Order
-	wg                      *sync.WaitGroup
 }
 
-func (u UploadOrder) Execute(userID uuid.UUID, number string) error {
+func (u UploadWithdraw) Execute(userID uuid.UUID, number string, sum string) error {
 	if !IsValidNumber(number) {
 		return ErrNotValidNumber
 	}
-	order, err := u.orderRepository.Get(number)
+	withdraw, err := u.withdrawRepository.Get(number)
 	if err != nil {
 		return err
 	}
 
-	if order != nil {
-		if order.UserAggregateID == userID {
+	if withdraw != nil {
+		if withdraw.UserAggregateID == userID {
 			return ErrUploadedByThisUser
 		} else {
 			return ErrUploadedByAnotherUser
@@ -35,12 +31,13 @@ func (u UploadOrder) Execute(userID uuid.UUID, number string) error {
 	if err != nil {
 		return err
 	}
-	user, newOrder := user.AddOrder(number)
+	user, err = user.AddWithdraw(number, sum)
+	if err != nil {
+		return err
+	}
 	err = u.userAggregateRepository.Save(user)
 	if err != nil {
 		return err
 	}
-	u.wg.Add(1)
-	u.ch <- newOrder
 	return nil
 }

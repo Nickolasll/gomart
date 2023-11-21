@@ -11,8 +11,15 @@ type UserAggregateRepositoryInterface interface {
 }
 
 type BalanceRepositoryInterface interface {
+	Get(userID uuid.UUID) (Balance, error)
 }
 
 type OrderRepositoryInterface interface {
 	Get(number string) (*Order, error)
+	GetAll(userID uuid.UUID) ([]Order, error)
+}
+
+type WithdrawRepositoryInterface interface {
+	Get(number string) (*Withdraw, error)
+	GetAll(userID uuid.UUID) ([]Withdraw, error)
 }

@@ -11,7 +11,7 @@ database "postgres" as db
 
 client -> handler ++ : Отправляет запрос на получение текущего баланса
 note over client, handler
-    GET /api/user/orders HTTP/1.1
+    GET /api/user/balance HTTP/1.1
 end note
 
 group middleware
