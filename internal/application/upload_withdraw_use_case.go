@@ -12,7 +12,7 @@ type UploadWithdraw struct {
 	log                     *logrus.Logger
 }
 
-func (u UploadWithdraw) Execute(userID uuid.UUID, number string, sum float32) error {
+func (u UploadWithdraw) Execute(userID uuid.UUID, number string, sum float64) error {
 	if !IsValidNumber(number) {
 		u.log.Info("ErrNotValidNumber")
 		return ErrNotValidNumber

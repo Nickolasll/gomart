@@ -4,7 +4,7 @@ import "errors"
 
 type AccrualOrderResponse struct {
 	Status  string  `json:"status"`
-	Accrual float32 `json:"accrual"`
+	Accrual float64 `json:"accrual"`
 }
 
 type AccrualClientInterface interface {

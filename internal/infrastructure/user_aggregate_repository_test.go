@@ -18,7 +18,7 @@ func TestReadWrite(t *testing.T) {
 	login := "login"
 	password := "password"
 	number := "12345"
-	sum := float32(500.0)
+	sum := float64(500.0)
 
 	sqlDB, err := sql.Open("pgx", "postgresql://admin:admin@localhost:5432/postgres")
 	require.NoError(t, err)

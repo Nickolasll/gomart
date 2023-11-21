@@ -12,11 +12,11 @@ type Balance struct {
 	Withdraw        int
 }
 
-func (b Balance) CurrentToFloat() float32 {
+func (b Balance) CurrentToFloat() float64 {
 	return MonetaryToFloat(b.Current)
 }
 
-func (b Balance) WithdrawToFloat() float32 {
+func (b Balance) WithdrawToFloat() float64 {
 	return MonetaryToFloat(b.Withdraw)
 }
 
@@ -28,11 +28,11 @@ type Order struct {
 	Accrual         int
 }
 
-func (o Order) AccrualToFloat() float32 {
+func (o Order) AccrualToFloat() float64 {
 	return MonetaryToFloat(o.Accrual)
 }
 
-func (o Order) SetAccrual(value float32) Order {
+func (o Order) SetAccrual(value float64) Order {
 	intValue := FloatToMonetary(value)
 	o.Accrual = intValue
 	return o
@@ -45,12 +45,12 @@ type Withdraw struct {
 	ProcessedAt     time.Time
 }
 
-func (w Withdraw) SetSum(value float32) Withdraw {
+func (w Withdraw) SetSum(value float64) Withdraw {
 	intValue := FloatToMonetary(value)
 	w.Sum = intValue
 	return w
 }
 
-func (w Withdraw) SumToFloat() float32 {
+func (w Withdraw) SumToFloat() float64 {
 	return MonetaryToFloat(w.Sum)
 }
