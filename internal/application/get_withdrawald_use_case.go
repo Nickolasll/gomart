@@ -1,6 +1,8 @@
 package application
 
 import (
+	"fmt"
+
 	"github.com/Nickolasll/gomart/internal/domain"
 	"github.com/google/uuid"
 )
@@ -14,5 +16,6 @@ func (u GetWithdrawals) Execute(userID uuid.UUID) ([]domain.Withdraw, error) {
 	if err != nil {
 		return withdrawals, err
 	}
+	fmt.Println(err.Error())
 	return withdrawals, nil
 }
