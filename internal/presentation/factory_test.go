@@ -368,8 +368,8 @@ func TestGetBalanceOk(t *testing.T) {
 	require.NoError(t, err)
 	err = json.Unmarshal(body, &balanceResponse)
 	require.NoError(t, err)
-	assert.Equal(t, balanceResponse.Current, float32(0))
-	assert.Equal(t, balanceResponse.Withdraw, float32(0))
+	assert.Equal(t, balanceResponse.Current, float64(0))
+	assert.Equal(t, balanceResponse.Withdraw, float64(0))
 }
 
 func TestUploadWithdrawBadRequest(t *testing.T) {

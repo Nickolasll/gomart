@@ -21,7 +21,7 @@ type Application struct {
 
 func CreateApplication(DB gorm.DB, jose JOSEService, url string, log *logrus.Logger) Application {
 	var wg sync.WaitGroup
-	channel := make(chan domain.Order)
+	channel := make(chan domain.Order, 10000)
 	userAggregateRepository := infrastructure.UserAggregateRepository{DB: DB}
 	orderRepository := infrastructure.OrderRepository{DB: DB}
 	balanceRepository := infrastructure.BalanceRepository{DB: DB}

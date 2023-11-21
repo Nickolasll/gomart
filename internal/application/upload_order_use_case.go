@@ -35,12 +35,12 @@ func (u UploadOrder) Execute(userID uuid.UUID, number string) error {
 	if err != nil {
 		return err
 	}
-	user, _ = user.AddOrder(number)
+	user, newOrder := user.AddOrder(number)
 	err = u.userAggregateRepository.Save(user)
 	if err != nil {
 		return err
 	}
-	// u.wg.Add(1)
-	// u.ch <- newOrder
+	u.wg.Add(1)
+	u.ch <- newOrder
 	return nil
 }
