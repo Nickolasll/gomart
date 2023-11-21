@@ -26,10 +26,7 @@ func CreateApplication(DB gorm.DB, jose JOSEService, url string, log *logrus.Log
 	orderRepository := infrastructure.OrderRepository{DB: DB}
 	balanceRepository := infrastructure.BalanceRepository{DB: DB}
 	withdrawRepository := infrastructure.WithdrawRepository{DB: DB}
-	accrualClient := infrastructure.AccrualClient{
-		URL: url,
-		Log: log,
-	}
+	accrualClient := infrastructure.AccrualClient{URL: url}
 	userAggregateRepository.Init()
 	registrationUseCase := Registration{
 		userAggregateRepository: userAggregateRepository,

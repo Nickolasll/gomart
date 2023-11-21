@@ -161,8 +161,6 @@ func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 	if err != nil {
 		if errors.Is(err, application.ErrNotValidNumber) {
 			w.WriteHeader(http.StatusUnprocessableEntity)
-		} else if errors.Is(err, application.ErrUploadedByThisUser) {
-			w.WriteHeader(http.StatusOK)
 		} else if errors.Is(err, application.ErrUploadedByAnotherUser) {
 			w.WriteHeader(http.StatusConflict)
 		} else if errors.Is(err, domain.ErrInsufficientFunds) {
@@ -173,7 +171,7 @@ func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 		}
 		return
 	}
-	w.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusOK)
 }
 
 func GetWithdrawalsHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {

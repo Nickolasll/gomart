@@ -383,7 +383,7 @@ func TestUploadWithdrawBadRequest(t *testing.T) {
 		},
 		{
 			name: "no sum",
-			body: []byte(`{"number": "12345"}`),
+			body: []byte(`{"order": "12345"}`),
 		},
 		{
 			name: "wrong fields",
@@ -424,7 +424,7 @@ func TestUploadWithdrawOtherUserUploaded(t *testing.T) {
 
 	tokenValue, err := jose.IssueToken(uuid.New())
 	require.NoError(t, err)
-	bodyReader := bytes.NewReader([]byte(`{"number": "` + number + `", "sum": 500.50}`))
+	bodyReader := bytes.NewReader([]byte(`{"order": "` + number + `", "sum": 500.50}`))
 	req := httptest.NewRequest("POST", "/api/user/balance/withdraw", bodyReader)
 	req.Header.Add("Authorization", tokenValue)
 	responseRecorder := httptest.NewRecorder()
@@ -448,12 +448,12 @@ func TestUploadWithdrawThisUserUploaded(t *testing.T) {
 
 	tokenValue, err := jose.IssueToken(userID)
 	require.NoError(t, err)
-	bodyReader := bytes.NewReader([]byte(`{"number": "` + number + `", "sum": 500.50}`))
+	bodyReader := bytes.NewReader([]byte(`{"order": "` + number + `", "sum": 500.50}`))
 	req := httptest.NewRequest("POST", "/api/user/balance/withdraw", bodyReader)
 	req.Header.Add("Authorization", tokenValue)
 	responseRecorder := httptest.NewRecorder()
 	router.ServeHTTP(responseRecorder, req)
-	assert.Equal(t, http.StatusOK, responseRecorder.Code)
+	assert.Equal(t, http.StatusConflict, responseRecorder.Code)
 }
 
 func TestUploadWithdrawUnprocessableEntity(t *testing.T) {
@@ -463,11 +463,11 @@ func TestUploadWithdrawUnprocessableEntity(t *testing.T) {
 	}{
 		{
 			name: "not a number",
-			body: []byte(`{"number": "not a number", "sum": 500.50}`),
+			body: []byte(`{"order": "not a number", "sum": 500.50}`),
 		},
 		{
 			name: "invalid number",
-			body: []byte(`{"number": "4147203059780942", "sum": 500.50}`),
+			body: []byte(`{"order": "4147203059780942", "sum": 500.50}`),
 		},
 	}
 	router, err := ChiFactory()
@@ -497,7 +497,7 @@ func TestUploadWithdrawPaymentRequired(t *testing.T) {
 
 	tokenValue, err := jose.IssueToken(user.ID)
 	require.NoError(t, err)
-	bodyReader := bytes.NewReader([]byte(`{"number": "` + number + `", "sum": 500.50}`))
+	bodyReader := bytes.NewReader([]byte(`{"order": "` + number + `", "sum": 500.50}`))
 	req := httptest.NewRequest("POST", "/api/user/balance/withdraw", bodyReader)
 	req.Header.Add("Authorization", tokenValue)
 	responseRecorder := httptest.NewRecorder()
@@ -522,12 +522,12 @@ func TestUploadWithdrawSuccess(t *testing.T) {
 
 	tokenValue, err := jose.IssueToken(userID)
 	require.NoError(t, err)
-	bodyReader := bytes.NewReader([]byte(`{"number": "` + number + `", "sum": 500}`))
+	bodyReader := bytes.NewReader([]byte(`{"order": "` + number + `", "sum": 500}`))
 	req := httptest.NewRequest("POST", "/api/user/balance/withdraw", bodyReader)
 	req.Header.Add("Authorization", tokenValue)
 	responseRecorder := httptest.NewRecorder()
 	router.ServeHTTP(responseRecorder, req)
-	assert.Equal(t, http.StatusAccepted, responseRecorder.Code)
+	assert.Equal(t, http.StatusOK, responseRecorder.Code)
 }
 
 func TestGetWithdrawalsNoContent(t *testing.T) {

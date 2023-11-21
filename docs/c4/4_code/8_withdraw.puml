@@ -41,11 +41,7 @@ return результат запроса
 
 balance -> balance: Проверка результата запроса
 opt Результат запроса != null
-    alt идентификатор пользователя из списания совпадает
-        balance --> handler: Пользователь уже зарегистрировал это списание
-        handler --> client: HTTP 200 Ok
-    else идентификатор пользователя не совпадает
-        balance --> handler: Списание уже было загружен одругим пользователем
+        balance --> handler: Списание уже было загружено
         handler --> client: HTTP 409 Conflict
     end
 end
@@ -60,5 +56,5 @@ end
     balance -> db ++ : Сохранение нового списания со средств и обновление счета пользователя
     deactivate db
 return Успешно списано
-return HTTP 202 Accepted
+return HTTP 200 OK
 @enduml

@@ -20,11 +20,7 @@ func (u UploadWithdraw) Execute(userID uuid.UUID, number string, sum float32) er
 	}
 
 	if withdraw != nil {
-		if withdraw.UserAggregateID == userID {
-			return ErrUploadedByThisUser
-		} else {
-			return ErrUploadedByAnotherUser
-		}
+		return ErrUploadedByAnotherUser
 	}
 
 	user, err := u.userAggregateRepository.Get(userID)
