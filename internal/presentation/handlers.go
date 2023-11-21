@@ -136,8 +136,8 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID)
 		return
 	}
 	balanceResponse := BalanceResponse{
-		Current:  balance.CurrentToFloat(),
-		Withdraw: balance.WithdrawToFloat(),
+		Current:   balance.CurrentToFloat(),
+		Withdrawn: balance.WithdrawToFloat(),
 	}
 	resp, err := json.Marshal(balanceResponse)
 	if err != nil {
