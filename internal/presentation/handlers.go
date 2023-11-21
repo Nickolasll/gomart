@@ -93,6 +93,7 @@ func UploadOrderHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID
 }
 
 func GetOrdersHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
+	w.Header().Set("Content-Type", "application/json")
 	orders, err := app.UseCases.GetOrders.Execute(UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -122,12 +123,12 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) 
 		log.Info(err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
 
 func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
+	w.Header().Set("Content-Type", "application/json")
 	balance, err := app.UseCases.GetBalance.Execute(UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -144,7 +145,6 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID)
 		log.Info(err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
@@ -177,6 +177,7 @@ func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 }
 
 func GetWithdrawalsHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
+	w.Header().Set("Content-Type", "application/json")
 	withdrawals, err := app.UseCases.GetWithdrawals.Execute(UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -204,7 +205,6 @@ func GetWithdrawalsHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 		log.Info(err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
