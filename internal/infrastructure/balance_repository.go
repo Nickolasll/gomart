@@ -12,7 +12,7 @@ type BalanceRepository struct {
 
 func (b BalanceRepository) Get(userID uuid.UUID) (domain.Balance, error) {
 	var balance domain.Balance
-	err := b.DB.First(&balance, userID).Error
+	err := b.DB.Where("user_aggregate_id = ?", userID).First(&balance).Error
 	if err != nil {
 		return balance, err
 	}
