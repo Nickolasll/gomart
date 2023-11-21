@@ -30,7 +30,7 @@ func (c AccrualClient) GetOrderStatus(number string) (domain.AccrualOrderRespons
 		return accrualResponse, domain.ErrAccrualIsBusy
 	}
 	if res.StatusCode == http.StatusNoContent {
-		c.Log.Info("http.StatusNoContent " + err.Error())
+		c.Log.Info("http.StatusNoContent")
 		return accrualResponse, domain.ErrDocumentNotFound
 	}
 
