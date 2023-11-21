@@ -153,11 +153,11 @@ func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 	var requestPayload UploadWithdrawPayload
 	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &requestPayload)
-	if err != nil || requestPayload.Number == "" || requestPayload.Sum == 0 {
+	if err != nil || requestPayload.Order == "" || requestPayload.Sum == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = app.UseCases.UploadWithdraw.Execute(UserID, requestPayload.Number, requestPayload.Sum)
+	err = app.UseCases.UploadWithdraw.Execute(UserID, requestPayload.Order, requestPayload.Sum)
 	if err != nil {
 		if errors.Is(err, application.ErrNotValidNumber) {
 			w.WriteHeader(http.StatusUnprocessableEntity)

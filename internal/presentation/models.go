@@ -20,8 +20,8 @@ type BalanceResponse struct {
 }
 
 type UploadWithdrawPayload struct {
-	Number string  `json:"number"`
-	Sum    float32 `json:"sum"`
+	Order string  `json:"order"`
+	Sum   float32 `json:"sum"`
 }
 
 type WithdrawalsResponse struct {
