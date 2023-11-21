@@ -47,6 +47,7 @@ func CreateApplication(DB gorm.DB, jose JOSEService, url string, log *logrus.Log
 	}
 	getBalanceUseCase := GetBalance{
 		balanceRepository: balanceRepository,
+		log:               log,
 	}
 	uploadWithdrawUseCase := UploadWithdraw{
 		withdrawRepository:      withdrawRepository,
