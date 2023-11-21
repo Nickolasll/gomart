@@ -33,6 +33,7 @@ func (u UploadWithdraw) Execute(userID uuid.UUID, number string, sum float64) er
 		u.log.Info("Get user err " + err.Error())
 		return err
 	}
+	u.log.Info("UploadWithdraw use case")
 	u.log.Info(user.Balance.Current)
 	u.log.Info(user.Balance.Withdraw)
 	user, err = user.AddWithdraw(number, sum)
