@@ -10,7 +10,7 @@ type UploadWithdraw struct {
 	userAggregateRepository domain.UserAggregateRepositoryInterface
 }
 
-func (u UploadWithdraw) Execute(userID uuid.UUID, number string, sum string) error {
+func (u UploadWithdraw) Execute(userID uuid.UUID, number string, sum float32) error {
 	if !IsValidNumber(number) {
 		return ErrNotValidNumber
 	}

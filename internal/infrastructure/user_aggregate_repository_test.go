@@ -18,7 +18,7 @@ func TestReadWrite(t *testing.T) {
 	login := "login"
 	password := "password"
 	number := "12345"
-	sum := "500.0"
+	sum := float32(500.0)
 
 	sqlDB, err := sql.Open("pgx", "postgresql://admin:admin@localhost:5432/postgres")
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestReadWrite(t *testing.T) {
 	assert.Equal(t, loadedUser.Login, login)
 	assert.Equal(t, loadedUser.Password, password)
 	assert.Equal(t, loadedUser.Balance.Current, 0)
-	assert.Equal(t, loadedUser.Balance.Withdraw, domain.StringToMonetary(sum))
+	assert.Equal(t, loadedUser.Balance.Withdraw, domain.FloatToMonetary(sum))
 	loadedOrder := loadedUser.Orders[0]
 	originalOrder := user.Orders[0]
 	assert.Equal(t, loadedOrder.Number, originalOrder.Number)

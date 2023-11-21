@@ -113,7 +113,7 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) 
 			UploadedAt: order.UploadedAt,
 		}
 		if orderResponse.Status == domain.StatusProcessed {
-			orderResponse.Accrual = order.AccrualToString()
+			orderResponse.Accrual = order.AccrualToFloat()
 		}
 		ordersResponse = append(ordersResponse, orderResponse)
 	}
@@ -136,8 +136,8 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID)
 		return
 	}
 	balanceResponse := BalanceResponse{
-		Current:  balance.CurrentToString(),
-		Withdraw: balance.WithdrawToString(),
+		Current:  balance.CurrentToFloat(),
+		Withdraw: balance.WithdrawToFloat(),
 	}
 	resp, err := json.Marshal(balanceResponse)
 	if err != nil {
@@ -153,7 +153,7 @@ func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 	var requestPayload UploadWithdrawPayload
 	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &requestPayload)
-	if err != nil || requestPayload.Number == "" || requestPayload.Sum == "" {
+	if err != nil || requestPayload.Number == "" || requestPayload.Sum == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -193,7 +193,7 @@ func GetWithdrawalsHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 
 		withdrawResponse := WithdrawalsResponse{
 			Order:       withdraw.Order,
-			Sum:         withdraw.SumToString(),
+			Sum:         withdraw.SumToFloat(),
 			ProcessedAt: withdraw.ProcessedAt,
 		}
 

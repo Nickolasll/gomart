@@ -3,8 +3,8 @@ package domain
 import "errors"
 
 type AccrualOrderResponse struct {
-	Status  string `json:"status"`
-	Accrual string `json:"accrual"`
+	Status  string  `json:"status"`
+	Accrual float32 `json:"accrual"`
 }
 
 type AccrualClientInterface interface {

@@ -43,7 +43,7 @@ func (u UserAggregate) UpdateOrder(order Order) UserAggregate {
 	return u
 }
 
-func (u UserAggregate) AddWithdraw(number string, sum string) (UserAggregate, error) {
+func (u UserAggregate) AddWithdraw(number string, sum float32) (UserAggregate, error) {
 	withdraw := Withdraw{
 		Order:           number,
 		UserAggregateID: u.ID,

@@ -12,12 +12,12 @@ type Balance struct {
 	Withdraw        int
 }
 
-func (b Balance) CurrentToString() string {
-	return MonetaryToString(b.Current)
+func (b Balance) CurrentToFloat() float32 {
+	return MonetaryToFloat(b.Current)
 }
 
-func (b Balance) WithdrawToString() string {
-	return MonetaryToString(b.Withdraw)
+func (b Balance) WithdrawToFloat() float32 {
+	return MonetaryToFloat(b.Withdraw)
 }
 
 type Order struct {
@@ -28,12 +28,12 @@ type Order struct {
 	Accrual         int
 }
 
-func (o Order) AccrualToString() string {
-	return MonetaryToString(o.Accrual)
+func (o Order) AccrualToFloat() float32 {
+	return MonetaryToFloat(o.Accrual)
 }
 
-func (o Order) SetAccrual(value string) Order {
-	intValue := StringToMonetary(value)
+func (o Order) SetAccrual(value float32) Order {
+	intValue := FloatToMonetary(value)
 	o.Accrual = intValue
 	return o
 }
@@ -45,12 +45,12 @@ type Withdraw struct {
 	ProcessedAt     time.Time
 }
 
-func (w Withdraw) SetSum(value string) Withdraw {
-	intValue := StringToMonetary(value)
+func (w Withdraw) SetSum(value float32) Withdraw {
+	intValue := FloatToMonetary(value)
 	w.Sum = intValue
 	return w
 }
 
-func (w Withdraw) SumToString() string {
-	return MonetaryToString(w.Sum)
+func (w Withdraw) SumToFloat() float32 {
+	return MonetaryToFloat(w.Sum)
 }

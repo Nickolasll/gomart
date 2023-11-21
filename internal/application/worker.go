@@ -23,8 +23,9 @@ func (w Worker) Serve() {
 	processed, err := w.ProcessingOrderUseCase.Execute(order)
 	if err != nil {
 		if errors.Is(err, domain.ErrAccrualIsBusy) {
-			time.Sleep(1 * time.Second)
+			w.wg.Add(1)
 			w.ch <- order
+			time.Sleep(1 * time.Second)
 		} else {
 			w.log.Info(err)
 		}
