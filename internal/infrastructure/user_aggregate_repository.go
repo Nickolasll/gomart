@@ -12,13 +12,14 @@ type UserAggregateRepository struct {
 	DB gorm.DB
 }
 
-func (u UserAggregateRepository) Init() {
-	u.DB.AutoMigrate(
+func (u UserAggregateRepository) Init() error {
+	err := u.DB.AutoMigrate(
 		&domain.UserAggregate{},
 		&domain.Order{},
 		&domain.Balance{},
 		&domain.Withdraw{},
 	)
+	return err
 }
 
 func (u UserAggregateRepository) Create(login string, password string) (domain.UserAggregate, error) {

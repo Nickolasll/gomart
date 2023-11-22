@@ -36,6 +36,10 @@ func Init() (*chi.Mux, error) {
 	balanceRepository := infrastructure.BalanceRepository{DB: *db}
 	withdrawRepository := infrastructure.WithdrawRepository{DB: *db}
 	accrualClient := infrastructure.AccrualClient{URL: cfg.AccrualSystemURL}
+	err = userAggregateRepository.Init()
+	if err != nil {
+		return nil, err
+	}
 	jose = application.JOSEService{TokenExp: cfg.TokenExp, SecretKey: cfg.SecretKey}
 	app := application.CreateApplication(
 		userAggregateRepository,

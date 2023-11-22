@@ -24,17 +24,16 @@ import (
 func main() {
 	log := logrus.New()
 	cfg := config.GetConfig()
-	log.Info(cfg.AccrualSystemURL)
-	log.Info(cfg.ServerEndpoint)
-	log.Info(cfg.DatabaseURI)
 	sqlDB, err := sql.Open("pgx", cfg.DatabaseURI)
 	if err != nil {
+		log.Info(err)
 		panic(err)
 	}
 	db, err := gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
+		log.Info(err)
 		panic(err)
 	}
 	userAggregateRepository := infrastructure.UserAggregateRepository{DB: *db}
@@ -42,6 +41,11 @@ func main() {
 	balanceRepository := infrastructure.BalanceRepository{DB: *db}
 	withdrawRepository := infrastructure.WithdrawRepository{DB: *db}
 	accrualClient := infrastructure.AccrualClient{URL: cfg.AccrualSystemURL}
+	err = userAggregateRepository.Init()
+	if err != nil {
+		log.Info(err)
+		panic(err)
+	}
 	jose := application.JOSEService{TokenExp: cfg.TokenExp, SecretKey: cfg.SecretKey}
 	app := application.CreateApplication(
 		userAggregateRepository,
@@ -55,6 +59,7 @@ func main() {
 	mux := presentation.ChiFactory(&app, &jose, log)
 	err = http.ListenAndServe(cfg.ServerEndpoint, mux)
 	if err != nil {
+		log.Info(err)
 		panic(err)
 	}
 	os.Exit(app.ShutDown())

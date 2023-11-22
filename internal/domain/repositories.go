@@ -7,7 +7,7 @@ type UserAggregateRepositoryInterface interface {
 	Get(userID uuid.UUID) (UserAggregate, error)
 	GetByLogin(login string) (*UserAggregate, error)
 	Save(userAggregate UserAggregate) error
-	Init()
+	Init() error
 }
 
 type BalanceRepositoryInterface interface {
