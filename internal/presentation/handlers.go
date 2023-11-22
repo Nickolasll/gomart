@@ -11,12 +11,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// Нужно ли везде проверять Content-Type?
-
 type AuthenticatedHandler func(w http.ResponseWriter, r *http.Request, UserID uuid.UUID)
 
 func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	var requestPayload RegistrationPayload
+	if r.Header.Get("Content-Type") != "application/json" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &requestPayload)
 	if err != nil {
@@ -44,6 +46,10 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var requestPayload RegistrationPayload
+	if r.Header.Get("Content-Type") != "application/json" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &requestPayload)
 	if err != nil {
@@ -70,6 +76,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadOrderHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
+	if r.Header.Get("Content-Type") != "text/plain" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	number, err := io.ReadAll(r.Body)
 	if err != nil || len(number) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -151,6 +161,10 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID)
 
 func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
 	var requestPayload UploadWithdrawPayload
+	if r.Header.Get("Content-Type") != "application/json" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	body, _ := io.ReadAll(r.Body)
 	err := json.Unmarshal(body, &requestPayload)
 	if err != nil || requestPayload.Order == "" || requestPayload.Sum == 0 {
