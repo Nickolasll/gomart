@@ -24,6 +24,9 @@ import (
 func main() {
 	log := logrus.New()
 	cfg := config.GetConfig()
+	log.Info(cfg.AccrualSystemURL)
+	log.Info(cfg.ServerEndpoint)
+	log.Info(cfg.DatabaseURI)
 	sqlDB, err := sql.Open("pgx", cfg.DatabaseURI)
 	if err != nil {
 		panic(err)
