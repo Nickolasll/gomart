@@ -24,8 +24,6 @@ func (u Registration) Execute(login string, password string) (string, error) {
 	}
 	tokenString, err := u.jose.IssueToken(userAggregate.ID)
 	if err != nil {
-		// Постоянно прокидывать ошибку выше или просто логгировать ее здесь?
-		// просто слишком часто повторяется
 		return "", err
 	}
 	return tokenString, err

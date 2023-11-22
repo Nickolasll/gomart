@@ -26,12 +26,13 @@ func TestReadWrite(t *testing.T) {
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	require.NoError(t, err)
+	repo := UserAggregateRepository{DB: *db}
+	repo.Init()
 	err = db.Delete(&domain.Withdraw{Order: number}).Error
 	require.NoError(t, err)
 	err = db.Delete(&domain.Order{Number: number}).Error
 	require.NoError(t, err)
 
-	repo := UserAggregateRepository{DB: *db}
 	user, err := repo.Create(login, password)
 	require.NoError(t, err)
 	user, order := user.AddOrder(number)
@@ -47,7 +48,7 @@ func TestReadWrite(t *testing.T) {
 	assert.Equal(t, loadedUser.Login, login)
 	assert.Equal(t, loadedUser.Password, password)
 	assert.Equal(t, loadedUser.Balance.Current, 0)
-	assert.Equal(t, loadedUser.Balance.Withdraw, domain.FloatToMonetary(sum))
+	assert.Equal(t, loadedUser.Balance.Withdrawn, domain.FloatToMonetary(sum))
 	loadedOrder := loadedUser.Orders[0]
 	originalOrder := user.Orders[0]
 	assert.Equal(t, loadedOrder.Number, originalOrder.Number)

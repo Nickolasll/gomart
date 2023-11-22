@@ -441,7 +441,7 @@ func TestUploadWithdrawThisUserUploaded(t *testing.T) {
 	repo := infrastructure.UserAggregateRepository{DB: *db}
 	user := domain.UserAggregate{ID: userID}
 	repo.Save(user)
-	user.Balance = domain.Balance{Current: 0, Withdraw: 0}
+	user.Balance = domain.Balance{Current: 0, Withdrawn: 0}
 	user, err = user.AddWithdraw(number, 0)
 	require.NoError(t, err)
 	repo.Save(user)
@@ -517,7 +517,7 @@ func TestUploadWithdrawSuccess(t *testing.T) {
 	repo := infrastructure.UserAggregateRepository{DB: *db}
 	repo.Save(user)
 	user.Balance.Current = 100000
-	user.Balance.Withdraw = 50000
+	user.Balance.Withdrawn = 50000
 	repo.Save(user)
 
 	tokenValue, err := jose.IssueToken(userID)

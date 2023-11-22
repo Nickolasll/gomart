@@ -9,15 +9,15 @@ import (
 type Balance struct {
 	UserAggregateID uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Current         int
-	Withdraw        int
+	Withdrawn       int
 }
 
 func (b Balance) CurrentToFloat() float64 {
 	return MonetaryToFloat(b.Current)
 }
 
-func (b Balance) WithdrawToFloat() float64 {
-	return MonetaryToFloat(b.Withdraw)
+func (b Balance) WithdrawnToFloat() float64 {
+	return MonetaryToFloat(b.Withdrawn)
 }
 
 type Order struct {

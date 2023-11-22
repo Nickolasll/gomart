@@ -55,6 +55,6 @@ func (u UserAggregate) AddWithdraw(number string, sum float64) (UserAggregate, e
 	}
 	u.Withdrawals = append(u.Withdrawals, withdraw)
 	u.Balance.Current -= withdraw.Sum
-	u.Balance.Withdraw += withdraw.Sum
+	u.Balance.Withdrawn += withdraw.Sum
 	return u, nil
 }

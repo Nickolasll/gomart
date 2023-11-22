@@ -27,7 +27,7 @@ func (u UserAggregateRepository) Create(login string, password string) (domain.U
 		ID:       userID,
 		Login:    login,
 		Password: password,
-		Balance:  domain.Balance{UserAggregateID: userID, Current: 0, Withdraw: 0},
+		Balance:  domain.Balance{UserAggregateID: userID, Current: 0, Withdrawn: 0},
 	}
 	err := u.DB.Create(&user).Error
 	if err != nil {
