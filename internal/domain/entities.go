@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+// По поводу полей типа time.Time.
+// Просто я думал на будущее, вдруг захотим фильтровать заказы и списания по дате
+// Я понимаю, что мне так проще, но - это менее оптимально
+// Если будет нужно, я переделаю
+
 type UserAggregate struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Login       string

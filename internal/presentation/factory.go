@@ -48,17 +48,20 @@ func ChiFactory() (*chi.Mux, error) {
 	router := chi.NewRouter()
 	router.Use(logging)
 	router.Use(compress)
-	// Думаю, как тут лучше разбить на саброутеры
-	// И вообще стоит ли тут использовать саброутеры?
-	// Возможно саброутер, использующий auth middleware
-	// Посмотрим ближе к готовности
+
+	// Я не придумал, как сделать rourer.Use(auth)
+	// Потому что оно использует ServeHTTP(w ResponseWriter, r *Request)
+	// И как пробросить UserID явно я не смог найти именно для chi
+	authSubRouter := chi.NewRouter()
+	authSubRouter.Post("/orders", auth(UploadOrderHandler))
+	authSubRouter.Get("/orders", auth(GetOrdersHandler))
+	authSubRouter.Get("/balance", auth(GetBalanceHandler))
+	authSubRouter.Post("/balance/withdraw", auth(UploadWithdrawHandler))
+	authSubRouter.Get("/withdrawals", auth(GetWithdrawalsHandler))
+
 	router.Post("/api/user/register", RegistrationHandler)
 	router.Post("/api/user/login", LoginHandler)
-	router.Post("/api/user/orders", auth(UploadOrderHandler))
-	router.Get("/api/user/orders", auth(GetOrdersHandler))
-	router.Get("/api/user/balance", auth(GetBalanceHandler))
-	router.Post("/api/user/balance/withdraw", auth(UploadWithdrawHandler))
-	router.Get("/api/user/withdrawals", auth(GetWithdrawalsHandler))
+	router.Mount("/api/user", authSubRouter)
 	return router, err
 }
 
