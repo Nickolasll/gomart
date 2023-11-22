@@ -1,45 +1,42 @@
-package main
+package tests
 
 import (
-	"net/http"
-	"os"
-
-	"github.com/Nickolasll/gomart/internal/application"
-	"github.com/Nickolasll/gomart/internal/config"
-	"github.com/Nickolasll/gomart/internal/infrastructure"
-	"github.com/Nickolasll/gomart/internal/presentation"
-	"github.com/sirupsen/logrus"
-
 	"database/sql"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/Nickolasll/gomart/internal/application"
+	"github.com/Nickolasll/gomart/internal/config"
+	"github.com/Nickolasll/gomart/internal/infrastructure"
+	"github.com/Nickolasll/gomart/internal/presentation"
+	"github.com/go-chi/chi/v5"
+	"github.com/sirupsen/logrus"
 )
 
-// Получился слишком жирный main.go
-// Но зато все инициализируется явно
-// Возможно стоит инкапсулировать коннекшен gorm?
+var db *gorm.DB
+var jose application.JOSEService
 
-func main() {
+func Init() (*chi.Mux, error) {
 	log := logrus.New()
 	cfg := config.GetConfig()
 	sqlDB, err := sql.Open("pgx", cfg.DatabaseURI)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	db, err := gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), &gorm.Config{
+	db, err = gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	userAggregateRepository := infrastructure.UserAggregateRepository{DB: *db}
 	orderRepository := infrastructure.OrderRepository{DB: *db}
 	balanceRepository := infrastructure.BalanceRepository{DB: *db}
 	withdrawRepository := infrastructure.WithdrawRepository{DB: *db}
 	accrualClient := infrastructure.AccrualClient{URL: cfg.AccrualSystemURL}
-	jose := application.JOSEService{TokenExp: cfg.TokenExp, SecretKey: cfg.SecretKey}
+	jose = application.JOSEService{TokenExp: cfg.TokenExp, SecretKey: cfg.SecretKey}
 	app := application.CreateApplication(
 		userAggregateRepository,
 		orderRepository,
@@ -49,10 +46,6 @@ func main() {
 		jose,
 		log,
 	)
-	mux := presentation.ChiFactory(app, jose, log)
-	err = http.ListenAndServe(cfg.ServerEndpoint, mux)
-	if err != nil {
-		panic(err)
-	}
-	os.Exit(app.ShutDown())
+	router := presentation.ChiFactory(app, jose, log)
+	return router, err
 }

@@ -1,9 +1,10 @@
-package infrastructure
+package tests
 
 import (
 	"testing"
 
 	"github.com/Nickolasll/gomart/internal/domain"
+	"github.com/Nickolasll/gomart/internal/infrastructure"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -26,7 +27,7 @@ func TestReadWrite(t *testing.T) {
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	require.NoError(t, err)
-	repo := UserAggregateRepository{DB: *db}
+	repo := infrastructure.UserAggregateRepository{DB: *db}
 	repo.Init()
 	err = db.Delete(&domain.Withdraw{Order: number}).Error
 	require.NoError(t, err)
