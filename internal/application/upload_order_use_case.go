@@ -7,14 +7,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type UploadOrder struct {
+type uploadOrder struct {
 	orderRepository         domain.OrderRepositoryInterface
 	userAggregateRepository domain.UserAggregateRepositoryInterface
 	ch                      chan<- domain.Order
 	wg                      *sync.WaitGroup
 }
 
-func (u UploadOrder) Execute(userID uuid.UUID, number string) error {
+func (u uploadOrder) Execute(userID uuid.UUID, number string) error {
 	if !IsValidNumber(number) {
 		return ErrNotValidNumber
 	}

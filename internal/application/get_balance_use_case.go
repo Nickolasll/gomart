@@ -5,11 +5,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type GetBalance struct {
+type getBalance struct {
 	balanceRepository domain.BalanceRepositoryInterface
 }
 
-func (u GetBalance) Execute(userID uuid.UUID) (domain.Balance, error) {
+func (u getBalance) Execute(userID uuid.UUID) (domain.Balance, error) {
 	balance, err := u.balanceRepository.Get(userID)
 	if err != nil {
 		return balance, err

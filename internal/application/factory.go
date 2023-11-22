@@ -4,65 +4,58 @@ import (
 	"sync"
 
 	"github.com/Nickolasll/gomart/internal/domain"
-	"github.com/Nickolasll/gomart/internal/infrastructure"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
-// Я хотел сделать пакет use_cases, но чтобы проект выглядел чище, но что-то пошло не так из-за exceptions
-// Это точно не исключения предметной области, а именно исключения приложения, но я хотел бы более
-// удобную структуру
-
 type Application struct {
-	UseCases UseCases
-	ch       chan domain.Order
-	wg       *sync.WaitGroup
+	Registration   registration
+	Login          login
+	UploadOrder    uploadOrder
+	GetOrders      getOrders
+	GetBalance     getBalance
+	UploadWithdraw uploadWithdraw
+	GetWithdrawals getWithdrawals
+	channel        chan domain.Order
+	waitGroup      *sync.WaitGroup
 }
 
-func CreateApplication(DB gorm.DB, jose JOSEService, url string, log *logrus.Logger) Application {
+func CreateApplication(
+	userAggregateRepository domain.UserAggregateRepositoryInterface,
+	orderRepository domain.OrderRepositoryInterface,
+	balanceRepository domain.BalanceRepositoryInterface,
+	withdrawRepository domain.WithdrawRepositoryInterface,
+	accrualClient domain.AccrualClientInterface,
+	jose JOSEService,
+	log *logrus.Logger,
+) Application {
 	var wg sync.WaitGroup
 	channel := make(chan domain.Order, 10000)
-	userAggregateRepository := infrastructure.UserAggregateRepository{DB: DB}
-	orderRepository := infrastructure.OrderRepository{DB: DB}
-	balanceRepository := infrastructure.BalanceRepository{DB: DB}
-	withdrawRepository := infrastructure.WithdrawRepository{DB: DB}
-	accrualClient := infrastructure.AccrualClient{URL: url}
-	userAggregateRepository.Init()
-	registrationUseCase := Registration{
+	registrationUseCase := registration{
 		userAggregateRepository: userAggregateRepository,
 		jose:                    jose,
 	}
-	loginUseCase := Login{
+	loginUseCase := login{
 		userAggregateRepository: userAggregateRepository,
 		jose:                    jose,
 	}
-	uploadOrderUseCase := UploadOrder{
+	uploadOrderUseCase := uploadOrder{
 		userAggregateRepository: userAggregateRepository,
 		orderRepository:         orderRepository,
 		ch:                      channel,
 		wg:                      &wg,
 	}
-	getOrdersUseCase := GetOrders{
+	getOrdersUseCase := getOrders{
 		orderRepository: orderRepository,
 	}
-	getBalanceUseCase := GetBalance{
+	getBalanceUseCase := getBalance{
 		balanceRepository: balanceRepository,
 	}
-	uploadWithdrawUseCase := UploadWithdraw{
+	uploadWithdrawUseCase := uploadWithdraw{
 		withdrawRepository:      withdrawRepository,
 		userAggregateRepository: userAggregateRepository,
 	}
-	getWithdrawalsUseCase := GetWithdrawals{
+	getWithdrawalsUseCase := getWithdrawals{
 		withdrawRepository: withdrawRepository,
-	}
-	useCases := UseCases{
-		Registration:   registrationUseCase,
-		Login:          loginUseCase,
-		UploadOrder:    uploadOrderUseCase,
-		GetOrders:      getOrdersUseCase,
-		GetBalance:     getBalanceUseCase,
-		UploadWithdraw: uploadWithdrawUseCase,
-		GetWithdrawals: getWithdrawalsUseCase,
 	}
 	processingOrderUseCase := ProcessingOrder{
 		userAggregateRepository: userAggregateRepository,
@@ -76,13 +69,19 @@ func CreateApplication(DB gorm.DB, jose JOSEService, url string, log *logrus.Log
 	}
 	go worker.Serve()
 	return Application{
-		UseCases: useCases,
-		wg:       &wg,
-		ch:       channel,
+		Registration:   registrationUseCase,
+		Login:          loginUseCase,
+		UploadOrder:    uploadOrderUseCase,
+		GetOrders:      getOrdersUseCase,
+		GetBalance:     getBalanceUseCase,
+		UploadWithdraw: uploadWithdrawUseCase,
+		GetWithdrawals: getWithdrawalsUseCase,
+		waitGroup:      &wg,
+		channel:        channel,
 	}
 }
 
 func (a Application) ShutDown() {
-	a.wg.Wait()
-	close(a.ch)
+	a.waitGroup.Wait()
+	close(a.channel)
 }

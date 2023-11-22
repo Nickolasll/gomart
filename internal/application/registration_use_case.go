@@ -4,12 +4,12 @@ import (
 	"github.com/Nickolasll/gomart/internal/domain"
 )
 
-type Registration struct {
+type registration struct {
 	userAggregateRepository domain.UserAggregateRepositoryInterface
 	jose                    JOSEService
 }
 
-func (u Registration) Execute(login string, password string) (string, error) {
+func (u registration) Execute(login string, password string) (string, error) {
 	user, err := u.userAggregateRepository.GetByLogin(login)
 	if err != nil {
 		return "", err

@@ -2,6 +2,7 @@ package presentation
 
 import (
 	"github.com/Nickolasll/gomart/internal/application"
+	"github.com/Nickolasll/gomart/internal/infrastructure"
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
 
@@ -28,8 +29,22 @@ func ChiFactory() (*chi.Mux, error) {
 	if err != nil {
 		return nil, err
 	}
+	userAggregateRepository := infrastructure.UserAggregateRepository{DB: *db}
+	orderRepository := infrastructure.OrderRepository{DB: *db}
+	balanceRepository := infrastructure.BalanceRepository{DB: *db}
+	withdrawRepository := infrastructure.WithdrawRepository{DB: *db}
+	userAggregateRepository.Init()
+	accrualClient := infrastructure.AccrualClient{URL: *AccrualSystemURL}
 	jose = application.JOSEService{TokenExp: TokenExp, SecretKey: SecretKey}
-	app = application.CreateApplication(*db, jose, *AccrualSystemURL, log)
+	app = application.CreateApplication(
+		userAggregateRepository,
+		orderRepository,
+		balanceRepository,
+		withdrawRepository,
+		accrualClient,
+		jose,
+		log,
+	)
 	router := chi.NewRouter()
 	router.Use(logging)
 	router.Use(compress)

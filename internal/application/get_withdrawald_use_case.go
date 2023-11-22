@@ -5,11 +5,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type GetWithdrawals struct {
+type getWithdrawals struct {
 	withdrawRepository domain.WithdrawRepositoryInterface
 }
 
-func (u GetWithdrawals) Execute(userID uuid.UUID) ([]domain.Withdraw, error) {
+func (u getWithdrawals) Execute(userID uuid.UUID) ([]domain.Withdraw, error) {
 	withdrawals, err := u.withdrawRepository.GetAll(userID)
 	if err != nil {
 		return withdrawals, err

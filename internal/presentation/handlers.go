@@ -27,7 +27,7 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	tokenString, err := app.UseCases.Registration.Execute(requestPayload.Login, requestPayload.Password)
+	tokenString, err := app.Registration.Execute(requestPayload.Login, requestPayload.Password)
 	if err != nil {
 		if errors.Is(err, application.ErrLoginAlreadyInUse) {
 			w.WriteHeader(http.StatusConflict)
@@ -54,7 +54,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	tokenString, err := app.UseCases.Login.Execute(requestPayload.Login, requestPayload.Password)
+	tokenString, err := app.Login.Execute(requestPayload.Login, requestPayload.Password)
 	if err != nil {
 		if errors.Is(err, application.ErrLoginOrPasswordIsInvalid) {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -75,7 +75,7 @@ func UploadOrderHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = app.UseCases.UploadOrder.Execute(UserID, string(number))
+	err = app.UploadOrder.Execute(UserID, string(number))
 	if err != nil {
 		if errors.Is(err, application.ErrNotValidNumber) {
 			w.WriteHeader(http.StatusUnprocessableEntity)
@@ -94,7 +94,7 @@ func UploadOrderHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID
 
 func GetOrdersHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
 	w.Header().Set("Content-Type", "application/json")
-	orders, err := app.UseCases.GetOrders.Execute(UserID)
+	orders, err := app.GetOrders.Execute(UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Info(err)
@@ -129,7 +129,7 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) 
 
 func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
 	w.Header().Set("Content-Type", "application/json")
-	balance, err := app.UseCases.GetBalance.Execute(UserID)
+	balance, err := app.GetBalance.Execute(UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Info(err)
@@ -157,7 +157,7 @@ func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = app.UseCases.UploadWithdraw.Execute(UserID, requestPayload.Order, requestPayload.Sum)
+	err = app.UploadWithdraw.Execute(UserID, requestPayload.Order, requestPayload.Sum)
 	if err != nil {
 		if errors.Is(err, application.ErrNotValidNumber) {
 			w.WriteHeader(http.StatusUnprocessableEntity)
@@ -176,7 +176,7 @@ func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 
 func GetWithdrawalsHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) {
 	w.Header().Set("Content-Type", "application/json")
-	withdrawals, err := app.UseCases.GetWithdrawals.Execute(UserID)
+	withdrawals, err := app.GetWithdrawals.Execute(UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Info(err)

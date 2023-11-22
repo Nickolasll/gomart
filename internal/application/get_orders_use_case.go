@@ -5,11 +5,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type GetOrders struct {
+type getOrders struct {
 	orderRepository domain.OrderRepositoryInterface
 }
 
-func (u GetOrders) Execute(userID uuid.UUID) ([]domain.Order, error) {
+func (u getOrders) Execute(userID uuid.UUID) ([]domain.Order, error) {
 	orders, err := u.orderRepository.GetAll(userID)
 	if err != nil {
 		return orders, err

@@ -5,12 +5,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type UploadWithdraw struct {
+type uploadWithdraw struct {
 	withdrawRepository      domain.WithdrawRepositoryInterface
 	userAggregateRepository domain.UserAggregateRepositoryInterface
 }
 
-func (u UploadWithdraw) Execute(userID uuid.UUID, number string, sum float64) error {
+func (u uploadWithdraw) Execute(userID uuid.UUID, number string, sum float64) error {
 	if !IsValidNumber(number) {
 		return ErrNotValidNumber
 	}
