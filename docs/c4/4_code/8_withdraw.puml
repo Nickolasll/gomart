@@ -41,9 +41,8 @@ return результат запроса
 
 balance -> balance: Проверка результата запроса
 opt Результат запроса != null
-        balance --> handler: Списание уже было загружено
-        handler --> client: HTTP 409 Conflict
-    end
+    balance --> handler: Списание уже было загружено
+    handler --> client: HTTP 409 Conflict
 end
 
 balance -> db ++ : Запрашивает баланс пользователя

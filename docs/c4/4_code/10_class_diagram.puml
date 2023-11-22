@@ -10,6 +10,7 @@ namespace domain {
     namespace entities {}
     namespace aggregates {}
     namespace repositories {}
+    namespace valueobjects {}
 }
 
 class application.services.JOSEService {
@@ -37,6 +38,7 @@ class domain.repositories.OrderRepositoryInterface {
 }
 
 class domain.repositories.WithdrawRepositoryInterface {
+    + void Get(userId : UUID) : Withdraw | null
     + void GetAll(userId : UUID) : Withdraw[]
 }
 
@@ -52,29 +54,29 @@ class domain.aggregates.UserAggregate {
     + void AddWithdraw(order : String, sum : Decimal)
 }
 
-class domain.entities.Balance {
-    - UserId: UUID
+class domain.valueobjects.Balance {
+    + UserId: UUID
     + Current : Decimal
     + Withdrawn : Decimal
 }
 
 class domain.entities.Order {
     + Number : String
-    - UserId: UUID
-    - Status : String
+    + UserId: UUID
+    + Status : String
     - Accrual : Decimal
-    - UploadedAt: DateTime
+    + UploadedAt: DateTime
     + vold Update(status : String, accrual : Decimal)
 }
 
 class domain.entities.Withdraw {
     + Order : String
-    - UserId: UUID
-    - Sum : Decimal
-    - ProcessedAt : DateTime 
+    + UserId: UUID
+    + Sum : Decimal
+    + ProcessedAt : DateTime 
 }
 
-domain.aggregates.UserAggregate "1" o-- "1" domain.entities.Balance
+domain.aggregates.UserAggregate "1" o-- "1" domain.valueobjects.Balance
 domain.aggregates.UserAggregate "1" o-- "*" domain.entities.Order
 domain.aggregates.UserAggregate "1" o-- "*" domain.entities.Withdraw
 @enduml
