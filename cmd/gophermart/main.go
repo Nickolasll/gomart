@@ -49,7 +49,7 @@ func main() {
 		jose,
 		log,
 	)
-	mux := presentation.ChiFactory(app, jose, log)
+	mux := presentation.ChiFactory(&app, &jose, log)
 	err = http.ListenAndServe(cfg.ServerEndpoint, mux)
 	if err != nil {
 		panic(err)

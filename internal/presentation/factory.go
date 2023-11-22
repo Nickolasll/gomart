@@ -7,12 +7,12 @@ import (
 )
 
 var log *logrus.Logger
-var app application.Application
-var jose application.JOSEService
+var app *application.Application
+var jose *application.JOSEService
 
 func ChiFactory(
-	App application.Application,
-	JOSE application.JOSEService,
+	App *application.Application,
+	JOSE *application.JOSEService,
 	Log *logrus.Logger,
 ) *chi.Mux {
 	app = App

@@ -46,6 +46,6 @@ func Init() (*chi.Mux, error) {
 		jose,
 		log,
 	)
-	router := presentation.ChiFactory(app, jose, log)
+	router := presentation.ChiFactory(&app, &jose, log)
 	return router, err
 }
