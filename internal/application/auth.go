@@ -1,7 +1,6 @@
 package application
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -58,8 +57,6 @@ func (jose JOSEService) ParseUserID(tokenString string) *uuid.UUID {
 	return &userID
 }
 
-// Может нужен отдельный сервис для паролей?
-// Я пока решил не плодить сущности
 func (jose JOSEService) Hash(password string) string {
 	var passwordBytes = []byte(password)
 	hashedPassword, _ := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
@@ -69,31 +66,4 @@ func (jose JOSEService) Hash(password string) string {
 func (jose JOSEService) VerifyPassword(hashedPassword string, currPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(currPassword))
 	return err == nil
-}
-
-func IsValidNumber(input string) bool {
-	number, err := strconv.Atoi(input)
-	if err != nil {
-		return false
-	}
-	return (number%10+checksum(number/10))%10 == 0
-}
-
-func checksum(number int) int {
-	var luhn int
-
-	for i := 0; number > 0; i++ {
-		cur := number % 10
-
-		if i%2 == 0 {
-			cur = cur * 2
-			if cur > 9 {
-				cur = cur%10 + cur/10
-			}
-		}
-
-		luhn += cur
-		number = number / 10
-	}
-	return luhn % 10
 }

@@ -41,7 +41,8 @@ func TestReadWrite(t *testing.T) {
 	user = user.UpdateOrder(order)
 	user, err = user.AddWithdraw(number, sum)
 	require.NoError(t, err)
-	repo.Save(user)
+	err = repo.Save(user)
+	require.NoError(t, err)
 
 	loadedUser, err := repo.Get(user.ID)
 	require.NoError(t, err)

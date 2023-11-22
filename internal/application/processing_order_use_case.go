@@ -18,7 +18,10 @@ func (p ProcessingOrder) updateOrder(UserID uuid.UUID, order domain.Order) error
 		return err
 	}
 	user = user.UpdateOrder(order)
-	p.userAggregateRepository.Save(user)
+	err = p.userAggregateRepository.Save(user)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

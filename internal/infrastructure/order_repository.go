@@ -19,7 +19,6 @@ func (o OrderRepository) Get(number string) (*domain.Order, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		} else {
-			// Постоянно прокидывать ошибку выше или просто логгировать ее здесь?
 			return nil, err
 		}
 	}

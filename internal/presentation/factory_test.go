@@ -18,8 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Получилась достаточно длинная портянка, но я пока не знаю как лучше раскидать по файлам
-
 func TestRegistrationBadRequest(t *testing.T) {
 	tests := []struct {
 		name string
