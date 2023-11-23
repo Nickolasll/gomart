@@ -29,7 +29,8 @@ func CreateApplication(
 	log *logrus.Logger,
 ) Application {
 	var wg sync.WaitGroup
-	channel := make(chan domain.Order)
+	// Без размера происходит блокировка в тестах
+	channel := make(chan domain.Order, 100)
 	registrationUseCase := registration{
 		userAggregateRepository: userAggregateRepository,
 		jose:                    jose,
