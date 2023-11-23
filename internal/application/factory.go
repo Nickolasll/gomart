@@ -29,7 +29,7 @@ func CreateApplication(
 	log *logrus.Logger,
 ) Application {
 	var wg sync.WaitGroup
-	channel := make(chan domain.Order, 10000)
+	channel := make(chan domain.Order)
 	registrationUseCase := registration{
 		userAggregateRepository: userAggregateRepository,
 		jose:                    jose,
