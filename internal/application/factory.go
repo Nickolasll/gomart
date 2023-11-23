@@ -29,7 +29,7 @@ func CreateApplication(
 	log *logrus.Logger,
 ) Application {
 	var wg sync.WaitGroup
-	// Без размера происходит блокировка в тестах
+	// Без размера происходит зависание в тестах
 	channel := make(chan domain.Order, 100)
 	registrationUseCase := registration{
 		userAggregateRepository: userAggregateRepository,
