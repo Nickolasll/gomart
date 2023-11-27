@@ -32,6 +32,7 @@ func CreateApplication(
 	processingOrderUseCase := ProcessingOrder{
 		userAggregateRepository: userAggregateRepository,
 		accrualClient:           accrualClient,
+		log:                     log,
 	}
 	channel := make(chan domain.Order, 1)
 	worker := Worker{
@@ -48,6 +49,7 @@ func CreateApplication(
 	loginUseCase := login{
 		userAggregateRepository: userAggregateRepository,
 		jose:                    jose,
+		log:                     log,
 	}
 	uploadOrderUseCase := uploadOrder{
 		userAggregateRepository: userAggregateRepository,

@@ -5,11 +5,13 @@ import (
 
 	"github.com/Nickolasll/gomart/internal/domain"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 type ProcessingOrder struct {
 	userAggregateRepository domain.UserAggregateRepositoryInterface
 	accrualClient           domain.AccrualClientInterface
+	log                     *logrus.Logger
 }
 
 func (p ProcessingOrder) updateOrder(UserID uuid.UUID, order domain.Order) error {
@@ -28,9 +30,11 @@ func (p ProcessingOrder) updateOrder(UserID uuid.UUID, order domain.Order) error
 func (p ProcessingOrder) Execute(order domain.Order) (bool, error) {
 	AccrualOrderResponse, err := p.accrualClient.GetOrderStatus(order.Number)
 	if errors.Is(err, domain.ErrDocumentNotFound) {
+		p.log.Info("Order number " + order.Number + " not found")
 		order.Status = domain.StatusInvalid
 		err = p.updateOrder(order.UserAggregateID, order)
 		if err != nil {
+			p.log.Info("Unable to update number " + order.Number + " of user " + order.UserAggregateID.String())
 			return false, err
 		}
 		return true, nil
@@ -43,9 +47,11 @@ func (p ProcessingOrder) Execute(order domain.Order) (bool, error) {
 	}
 	err = p.updateOrder(order.UserAggregateID, order)
 	if err != nil {
+		p.log.Info("Unable to update number " + order.Number + " of user " + order.UserAggregateID.String())
 		return false, err
 	}
 	if order.Status == domain.StatusProcessing || order.Status == domain.StatusRegistred {
+		p.log.Info("Order " + order.Number + " is still processing")
 		return false, nil
 	}
 	return true, nil

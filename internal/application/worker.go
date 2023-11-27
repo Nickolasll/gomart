@@ -17,8 +17,7 @@ type Worker struct {
 	wg                     *sync.WaitGroup
 }
 
-func (w Worker) Serve() {
-	order := <-w.ch
+func (w Worker) processOrder(order domain.Order) {
 	defer w.wg.Done()
 	processed, err := w.ProcessingOrderUseCase.Execute(order)
 	if err != nil {
@@ -33,5 +32,11 @@ func (w Worker) Serve() {
 	if !processed {
 		w.wg.Add(1)
 		w.ch <- order
+	}
+}
+
+func (w Worker) Serve() {
+	for order := range w.ch {
+		w.processOrder(order)
 	}
 }
