@@ -27,6 +27,7 @@ func (w Worker) processOrder(order domain.Order) {
 			time.Sleep(1 * time.Second)
 		} else {
 			w.log.Info(err)
+			return
 		}
 	}
 	if !processed {
