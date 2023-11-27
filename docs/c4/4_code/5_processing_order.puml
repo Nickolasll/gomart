@@ -21,47 +21,48 @@ order -> queue: Помещает заказ в очередь для обраб�
 deactivate order
 queue --> worker: Заказ
 deactivate queue
-worker -> accrual_client ++ : Запрашивает статус обработки заказа
-accrual_client -> accrual ++ : Выполняет запрос
-note over accrual
-    GET /api/orders/{number} HTTP/1.1 
-end note
-return Ответ на запрос
-note over accrual_client
-  200 OK HTTP/1.1
-  Content-Type: application/json
-  
-  {
-      "order": "<number>",
-      "status": "PROCESSED",
-      "accrual": 500
-  }
-end note   
-accrual_client -> accrual_client: Анализ статус ответа
-alt HTTP 200 Ok
-    accrual_client --> worker : Информация о заказе
-    worker -> worker: Анализ статуса заказа
-    alt status = PROCESSED
-        worker -> db ++ : Обновление состояния заказа и счета пользователя
+loop Обработка не завершена
+    worker -> accrual_client ++ : Запрашивает статус обработки заказа
+    accrual_client -> accrual ++ : Выполняет запрос
+    note over accrual
+        GET /api/orders/{number} HTTP/1.1 
+    end note
+    return Ответ на запрос
+    note over accrual_client
+    200 OK HTTP/1.1
+    Content-Type: application/json
+    
+    {
+        "order": "<number>",
+        "status": "PROCESSED",
+        "accrual": 500
+    }
+    end note   
+    accrual_client -> accrual_client: Анализ статус ответа
+    alt HTTP 200 Ok
+        accrual_client --> worker : Информация о заказе
+        worker -> worker: Анализ статуса заказа
+        alt status = PROCESSED
+            worker -> db ++ : Обновление состояния заказа и счета пользователя
+            deactivate db
+            worker -> worker: Обработка завершена, выход из цикла
+        else status = INVALID
+            worker -> db ++ : Обновление состояния заказа
+            deactivate db
+            worker -> worker: Обработка завершена, выход из цикла
+        else status = REGISTERED или status = PROCESSING
+            worker -> db ++ : Обновление состояния заказа
+            deactivate db
+        end
+    else HTTP 204 no content
+        accrual_client --> worker : Ошибка: Заказ отсуствует
+        worker -> db ++ : Обновление заказа - status = INVALID
         deactivate db
-    else status = INVALID
-        worker -> db ++ : Обновление состояния заказа
-        deactivate db
-    else status = REGISTERED или status = PROCESSING
-        worker -> db ++ : Обновление состояния заказа
-        deactivate db
-        worker -> queue ++ : Помещает заказ в конец очереди
-        deactivate queue
+        worker -> worker: Обработка завершена, выход из цикла
+    else HTTP > 204
+        accrual_client --> worker : Ошибка: Заказ не готов
+        deactivate accrual_client
+        worker -> worker: sleep 1sec
     end
-else HTTP 204 no content
-    accrual_client --> worker : Ошибка: Заказ отсуствует
-    worker -> db ++ : Обновление заказа - status = INVALID
-    deactivate db
-else HTTP > 204
-    accrual_client --> worker : Ошибка: Заказ не готов
-    deactivate accrual_client
-    worker -> queue ++ : Помещает заказ в конец очереди
-    deactivate queue
-    worker -> worker: sleep 1sec
-end
+end loop
 @enduml

@@ -61,6 +61,7 @@ func CreateApplication(
 	}
 	getOrdersUseCase := getOrders{
 		orderRepository: orderRepository,
+		log:             log,
 	}
 	getBalanceUseCase := getBalance{
 		balanceRepository: balanceRepository,

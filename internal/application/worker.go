@@ -12,7 +12,7 @@ import (
 
 type Worker struct {
 	ProcessingOrderUseCase ProcessingOrder
-	ch                     chan domain.Order
+	ch                     <-chan domain.Order
 	log                    *logrus.Logger
 	wg                     *sync.WaitGroup
 }
