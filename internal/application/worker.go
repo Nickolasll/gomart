@@ -19,9 +19,9 @@ type Worker struct {
 
 func (w Worker) Serve() {
 	defer w.wg.Done()
-	for {
-		order := <-w.ch
-		for {
+	for order := range w.ch {
+		processed := false
+		for !processed {
 			processed, err := w.ProcessingOrderUseCase.Execute(order)
 			if err != nil {
 				if errors.Is(err, domain.ErrAccrualIsBusy) {
