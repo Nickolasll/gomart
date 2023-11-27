@@ -1,11 +1,7 @@
 package application
 
 import (
-	"context"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 
 	"github.com/Nickolasll/gomart/internal/domain"
 	"github.com/sirupsen/logrus"
@@ -33,12 +29,6 @@ func CreateApplication(
 	log *logrus.Logger,
 ) Application {
 	var wg sync.WaitGroup
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		exit := make(chan os.Signal, 1)
-		signal.Notify(exit, os.Interrupt, syscall.SIGTERM)
-		cancel()
-	}()
 	processingOrderUseCase := ProcessingOrder{
 		userAggregateRepository: userAggregateRepository,
 		accrualClient:           accrualClient,
@@ -52,7 +42,7 @@ func CreateApplication(
 		wg:                     &wg,
 	}
 	wg.Add(1)
-	go worker.Serve(ctx)
+	go worker.Serve()
 	registrationUseCase := registration{
 		userAggregateRepository: userAggregateRepository,
 		jose:                    jose,

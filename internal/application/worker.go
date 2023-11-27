@@ -1,7 +1,6 @@
 package application
 
 import (
-	"context"
 	"errors"
 	"time"
 
@@ -29,16 +28,10 @@ func (w Worker) routine(order domain.Order) bool {
 	return processed
 }
 
-func (w Worker) Serve(ctx context.Context) {
+func (w Worker) Serve() {
 	defer w.wg.Done()
 	for order := range w.ch {
-		select {
-		case <-ctx.Done():
-			w.log.Info("Worker process shut down")
-			return
-		default:
-			for processed := false; !processed; processed = w.routine(order) {
-			}
+		for processed := false; !processed; processed = w.routine(order) {
 		}
 	}
 }
