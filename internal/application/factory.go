@@ -34,7 +34,7 @@ func CreateApplication(
 		accrualClient:           accrualClient,
 		log:                     log,
 	}
-	channel := make(chan domain.Order)
+	channel := make(chan domain.Order, 1)
 	worker := Worker{
 		ProcessingOrderUseCase: processingOrderUseCase,
 		ch:                     channel,

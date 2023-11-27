@@ -9,6 +9,7 @@ import (
 
 	"github.com/Nickolasll/gomart/internal/application"
 	"github.com/Nickolasll/gomart/internal/config"
+	"github.com/Nickolasll/gomart/internal/domain"
 	"github.com/Nickolasll/gomart/internal/infrastructure"
 	"github.com/Nickolasll/gomart/internal/presentation"
 	"github.com/go-chi/chi/v5"
@@ -35,7 +36,7 @@ func Init() (*chi.Mux, error) {
 	orderRepository := infrastructure.OrderRepository{DB: *db}
 	balanceRepository := infrastructure.BalanceRepository{DB: *db}
 	withdrawRepository := infrastructure.WithdrawRepository{DB: *db}
-	accrualClient := infrastructure.AccrualClient{URL: cfg.AccrualSystemURL}
+	accrualClient := FakeAccrualClient{URL: cfg.AccrualSystemURL}
 	err = userAggregateRepository.Init()
 	if err != nil {
 		return nil, err
@@ -52,4 +53,20 @@ func Init() (*chi.Mux, error) {
 	)
 	router := presentation.ChiFactory(&app, &jose, log)
 	return router, err
+}
+
+type FakeAccrualClient struct {
+	URL string
+}
+
+func (c FakeAccrualClient) GetOrderStatus(number string) (domain.AccrualOrderResponse, error) {
+	var accrualResponse domain.AccrualOrderResponse
+	switch number {
+	case "1":
+		accrualResponse.Status = domain.StatusInvalid
+	default:
+		accrualResponse.Status = domain.StatusProcessed
+		accrualResponse.Accrual = 33.44
+	}
+	return accrualResponse, nil
 }
