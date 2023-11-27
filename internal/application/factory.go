@@ -33,7 +33,7 @@ func CreateApplication(
 		userAggregateRepository: userAggregateRepository,
 		accrualClient:           accrualClient,
 	}
-	channel := make(chan domain.Order)
+	channel := make(chan domain.Order, 1)
 	worker := Worker{
 		ProcessingOrderUseCase: processingOrderUseCase,
 		ch:                     channel,
