@@ -84,7 +84,7 @@ func CreateApplication(
 }
 
 func (a Application) ShutDown() int {
-	a.waitGroup.Wait()
 	close(a.channel)
+	a.waitGroup.Wait()
 	return 0
 }
