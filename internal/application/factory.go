@@ -29,8 +29,18 @@ func CreateApplication(
 	log *logrus.Logger,
 ) Application {
 	var wg sync.WaitGroup
-	// Без размера происходит зависание в тестах
-	channel := make(chan domain.Order, 100)
+	processingOrderUseCase := ProcessingOrder{
+		userAggregateRepository: userAggregateRepository,
+		accrualClient:           accrualClient,
+	}
+	channel := make(chan domain.Order)
+	worker := Worker{
+		ProcessingOrderUseCase: processingOrderUseCase,
+		ch:                     channel,
+		log:                    log,
+		wg:                     &wg,
+	}
+	go worker.Serve()
 	registrationUseCase := registration{
 		userAggregateRepository: userAggregateRepository,
 		jose:                    jose,
@@ -58,17 +68,6 @@ func CreateApplication(
 	getWithdrawalsUseCase := getWithdrawals{
 		withdrawRepository: withdrawRepository,
 	}
-	processingOrderUseCase := ProcessingOrder{
-		userAggregateRepository: userAggregateRepository,
-		accrualClient:           accrualClient,
-	}
-	worker := Worker{
-		ProcessingOrderUseCase: processingOrderUseCase,
-		ch:                     channel,
-		log:                    log,
-		wg:                     &wg,
-	}
-	go worker.Serve()
 	return Application{
 		Registration:   registrationUseCase,
 		Login:          loginUseCase,

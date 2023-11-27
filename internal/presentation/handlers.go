@@ -35,7 +35,7 @@ func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusConflict)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			log.Info(err)
+			log.Error(err)
 		}
 		return
 	}
@@ -66,7 +66,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnauthorized)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
-			log.Info(err)
+			log.Error(err)
 		}
 		return
 	}
@@ -87,15 +87,16 @@ func UploadOrderHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID
 	}
 	err = app.UploadOrder.Execute(UserID, string(number))
 	if err != nil {
-		if errors.Is(err, application.ErrNotValidNumber) {
+		switch {
+		case errors.Is(err, application.ErrNotValidNumber):
 			w.WriteHeader(http.StatusUnprocessableEntity)
-		} else if errors.Is(err, application.ErrUploadedByThisUser) {
+		case errors.Is(err, application.ErrUploadedByThisUser):
 			w.WriteHeader(http.StatusOK)
-		} else if errors.Is(err, application.ErrUploadedByAnotherUser) {
+		case errors.Is(err, application.ErrUploadedByAnotherUser):
 			w.WriteHeader(http.StatusConflict)
-		} else {
+		default:
 			w.WriteHeader(http.StatusInternalServerError)
-			log.Info(err)
+			log.Error(err)
 		}
 		return
 	}
@@ -107,7 +108,7 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) 
 	orders, err := app.GetOrders.Execute(UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Info(err)
+		log.Error(err)
 		return
 	}
 	if len(orders) == 0 {
@@ -130,7 +131,7 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID) 
 	resp, err := json.Marshal(ordersResponse)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Info(err)
+		log.Error(err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -142,7 +143,7 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID)
 	balance, err := app.GetBalance.Execute(UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Info(err)
+		log.Error(err)
 		return
 	}
 	balanceResponse := BalanceResponse{
@@ -152,7 +153,7 @@ func GetBalanceHandler(w http.ResponseWriter, r *http.Request, UserID uuid.UUID)
 	resp, err := json.Marshal(balanceResponse)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Info(err)
+		log.Error(err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -173,15 +174,16 @@ func UploadWithdrawHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 	}
 	err = app.UploadWithdraw.Execute(UserID, requestPayload.Order, requestPayload.Sum)
 	if err != nil {
-		if errors.Is(err, application.ErrNotValidNumber) {
+		switch {
+		case errors.Is(err, application.ErrNotValidNumber):
 			w.WriteHeader(http.StatusUnprocessableEntity)
-		} else if errors.Is(err, application.ErrUploadedByAnotherUser) {
+		case errors.Is(err, application.ErrUploadedByAnotherUser):
 			w.WriteHeader(http.StatusConflict)
-		} else if errors.Is(err, domain.ErrInsufficientFunds) {
+		case errors.Is(err, domain.ErrInsufficientFunds):
 			w.WriteHeader(http.StatusPaymentRequired)
-		} else {
+		default:
 			w.WriteHeader(http.StatusInternalServerError)
-			log.Info(err)
+			log.Error(err)
 		}
 		return
 	}
@@ -193,7 +195,7 @@ func GetWithdrawalsHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 	withdrawals, err := app.GetWithdrawals.Execute(UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Info(err)
+		log.Error(err)
 		return
 	}
 	if len(withdrawals) == 0 {
@@ -214,7 +216,7 @@ func GetWithdrawalsHandler(w http.ResponseWriter, r *http.Request, UserID uuid.U
 	resp, err := json.Marshal(withdrawalsResponse)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Info(err)
+		log.Error(err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)

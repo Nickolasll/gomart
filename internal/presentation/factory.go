@@ -22,9 +22,6 @@ func ChiFactory(
 	router.Use(logging)
 	router.Use(compress)
 
-	// Я не придумал, как сделать rourer.Use(auth)
-	// Потому что оно использует ServeHTTP(w ResponseWriter, r *Request)
-	// И как пробросить UserID явно я не смог найти именно для chi
 	authSubRouter := chi.NewRouter()
 	authSubRouter.Post("/orders", auth(UploadOrderHandler))
 	authSubRouter.Get("/orders", auth(GetOrdersHandler))

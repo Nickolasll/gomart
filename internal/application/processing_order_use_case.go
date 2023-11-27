@@ -27,17 +27,15 @@ func (p ProcessingOrder) updateOrder(UserID uuid.UUID, order domain.Order) error
 
 func (p ProcessingOrder) Execute(order domain.Order) (bool, error) {
 	AccrualOrderResponse, err := p.accrualClient.GetOrderStatus(order.Number)
-	if err != nil {
-		if errors.Is(err, domain.ErrDocumentNotFound) {
-			order.Status = domain.StatusInvalid
-			err = p.updateOrder(order.UserAggregateID, order)
-			if err != nil {
-				return false, err
-			}
-			return true, nil
-		} else {
+	if errors.Is(err, domain.ErrDocumentNotFound) {
+		order.Status = domain.StatusInvalid
+		err = p.updateOrder(order.UserAggregateID, order)
+		if err != nil {
 			return false, err
 		}
+		return true, nil
+	} else if err != nil {
+		return false, err
 	}
 	order.Status = AccrualOrderResponse.Status
 	if AccrualOrderResponse.Status == domain.StatusProcessed {
