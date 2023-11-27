@@ -19,7 +19,8 @@ type Worker struct {
 
 func (w Worker) Serve() {
 	defer w.wg.Done()
-	for order := range w.ch {
+	for {
+		order := <-w.ch
 		for {
 			processed, err := w.ProcessingOrderUseCase.Execute(order)
 			if err != nil {
