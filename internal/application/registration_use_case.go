@@ -2,11 +2,13 @@ package application
 
 import (
 	"github.com/Nickolasll/gomart/internal/domain"
+	"github.com/sirupsen/logrus"
 )
 
 type registration struct {
 	userAggregateRepository domain.UserAggregateRepositoryInterface
 	jose                    JOSEService
+	log                     *logrus.Logger
 }
 
 func (u registration) Execute(login string, password string) (string, error) {
@@ -15,6 +17,7 @@ func (u registration) Execute(login string, password string) (string, error) {
 		return "", err
 	}
 	if user != nil {
+		u.log.Info("User already exists")
 		return "", ErrLoginAlreadyInUse
 	}
 	hashedPassword := u.jose.Hash(password)

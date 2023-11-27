@@ -3,12 +3,14 @@ package application
 import (
 	"github.com/Nickolasll/gomart/internal/domain"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 type uploadOrder struct {
 	orderRepository         domain.OrderRepositoryInterface
 	userAggregateRepository domain.UserAggregateRepositoryInterface
 	ch                      chan<- domain.Order
+	log                     *logrus.Logger
 }
 
 func (u uploadOrder) Execute(userID uuid.UUID, number string) error {
@@ -22,8 +24,10 @@ func (u uploadOrder) Execute(userID uuid.UUID, number string) error {
 
 	if order != nil {
 		if order.UserAggregateID == userID {
+			u.log.Info("Order was uploaded by this user")
 			return ErrUploadedByThisUser
 		} else {
+			u.log.Info("Order was uploaded by another user")
 			return ErrUploadedByAnotherUser
 		}
 	}

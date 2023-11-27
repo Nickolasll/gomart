@@ -3,11 +3,13 @@ package application
 import (
 	"github.com/Nickolasll/gomart/internal/domain"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 type uploadWithdraw struct {
 	withdrawRepository      domain.WithdrawRepositoryInterface
 	userAggregateRepository domain.UserAggregateRepositoryInterface
+	log                     *logrus.Logger
 }
 
 func (u uploadWithdraw) Execute(userID uuid.UUID, number string, sum float64) error {
@@ -20,6 +22,7 @@ func (u uploadWithdraw) Execute(userID uuid.UUID, number string, sum float64) er
 	}
 
 	if withdraw != nil {
+		u.log.Info("Withdraw already uploaded")
 		return ErrUploadedByAnotherUser
 	}
 

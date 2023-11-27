@@ -46,6 +46,7 @@ func CreateApplication(
 	registrationUseCase := registration{
 		userAggregateRepository: userAggregateRepository,
 		jose:                    jose,
+		log:                     log,
 	}
 	loginUseCase := login{
 		userAggregateRepository: userAggregateRepository,
@@ -56,6 +57,7 @@ func CreateApplication(
 		userAggregateRepository: userAggregateRepository,
 		orderRepository:         orderRepository,
 		ch:                      channel,
+		log:                     log,
 	}
 	getOrdersUseCase := getOrders{
 		orderRepository: orderRepository,
@@ -66,6 +68,7 @@ func CreateApplication(
 	uploadWithdrawUseCase := uploadWithdraw{
 		withdrawRepository:      withdrawRepository,
 		userAggregateRepository: userAggregateRepository,
+		log:                     log,
 	}
 	getWithdrawalsUseCase := getWithdrawals{
 		withdrawRepository: withdrawRepository,
