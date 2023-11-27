@@ -31,7 +31,6 @@ func (p ProcessingOrder) Execute(order domain.Order) (bool, error) {
 	AccrualOrderResponse, err := p.accrualClient.GetOrderStatus(order.Number)
 	if errors.Is(err, domain.ErrDocumentNotFound) {
 		p.log.Info("Order number " + order.Number + " not found")
-		order.Status = domain.StatusInvalid
 		err = p.updateOrder(order.UserAggregateID, order)
 		if err != nil {
 			p.log.Info("Unable to update number " + order.Number + " of user " + order.UserAggregateID.String())
