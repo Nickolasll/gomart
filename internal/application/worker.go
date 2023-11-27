@@ -1,7 +1,7 @@
 package application
 
 import (
-	"errors"
+	"context"
 	"time"
 
 	"sync"
@@ -18,27 +18,30 @@ type Worker struct {
 }
 
 func (w Worker) routine(order domain.Order) bool {
-	select {
-	default:
-		time.Sleep(5 * time.Second)
-		processed, err := w.ProcessingOrderUseCase.Execute(order)
-		if errors.Is(err, domain.ErrAccrualIsBusy) {
-			time.Sleep(1 * time.Second)
-		} else {
-			w.log.Info(err)
-			processed = true
-		}
-		return processed
-	case <-time.After(1 * time.Second):
-		w.log.Info("Goroutine cancelled by timeout")
-		return true
-	}
+	// processed, err := w.ProcessingOrderUseCase.Execute(order)
+	// if errors.Is(err, domain.ErrAccrualIsBusy) {
+	// 	time.Sleep(1 * time.Second)
+	// } else {
+	// 	w.log.Info(err)
+	// 	processed = true
+	// }
+	// return processed
+	time.Sleep(3 * time.Second)
+	return false
 }
 
 func (w Worker) Serve() {
 	defer w.wg.Done()
 	for order := range w.ch {
 		for processed := false; !processed; processed = w.routine(order) {
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
+			select {
+			case <-ctx.Done():
+				w.log.Error("Processing order time out")
+				continue
+			default:
+			}
 		}
 	}
 }
