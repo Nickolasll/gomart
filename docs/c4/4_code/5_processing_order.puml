@@ -45,20 +45,20 @@ loop Обработка не завершена
         alt status = PROCESSED
             worker -> db ++ : Обновление состояния заказа и счета пользователя
             deactivate db
-            worker -> worker: Обработка завершена, выход из цикла
+            worker -> worker: Обработка завершена
         else status = INVALID
             worker -> db ++ : Обновление состояния заказа
             deactivate db
-            worker -> worker: Обработка завершена, выход из цикла
+            worker -> worker: Обработка завершена
         else status = REGISTERED или status = PROCESSING
             worker -> db ++ : Обновление состояния заказа
             deactivate db
         end
     else HTTP 204 no content
         accrual_client --> worker : Ошибка: Заказ отсуствует
-        worker -> db ++ : Обновление заказа - status = INVALID
+        worker -> db ++ : Обновление заказа - status = INVALID (НЕПРАВДА, ТАК АВТОТЕСТЫ НЕ ПРОХОДЯТ)
         deactivate db
-        worker -> worker: Обработка завершена, выход из цикла
+        worker -> worker: Обработка завершена
     else HTTP > 204
         accrual_client --> worker : Ошибка: Заказ не готов
         deactivate accrual_client
