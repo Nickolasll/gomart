@@ -18,14 +18,21 @@ type Worker struct {
 }
 
 func (w Worker) routine(order domain.Order) bool {
-	processed, err := w.ProcessingOrderUseCase.Execute(order)
-	if errors.Is(err, domain.ErrAccrualIsBusy) {
-		time.Sleep(1 * time.Second)
-	} else {
-		w.log.Info(err)
-		processed = true
+	select {
+	default:
+		time.Sleep(5 * time.Second)
+		processed, err := w.ProcessingOrderUseCase.Execute(order)
+		if errors.Is(err, domain.ErrAccrualIsBusy) {
+			time.Sleep(1 * time.Second)
+		} else {
+			w.log.Info(err)
+			processed = true
+		}
+		return processed
+	case <-time.After(1 * time.Second):
+		w.log.Info("Goroutine cancelled by timeout")
+		return true
 	}
-	return processed
 }
 
 func (w Worker) Serve() {
