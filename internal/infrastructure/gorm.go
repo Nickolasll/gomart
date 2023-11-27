@@ -5,7 +5,6 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 func EstablishConnection(DatabaseURI string) (*gorm.DB, error) {
@@ -13,9 +12,7 @@ func EstablishConnection(DatabaseURI string) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db, err := gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
+	db, err := gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
