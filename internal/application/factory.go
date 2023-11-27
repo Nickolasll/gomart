@@ -41,6 +41,7 @@ func CreateApplication(
 		log:                    log,
 		wg:                     &wg,
 	}
+	wg.Add(1)
 	go worker.Serve()
 	registrationUseCase := registration{
 		userAggregateRepository: userAggregateRepository,
@@ -55,7 +56,6 @@ func CreateApplication(
 		userAggregateRepository: userAggregateRepository,
 		orderRepository:         orderRepository,
 		ch:                      channel,
-		wg:                      &wg,
 	}
 	getOrdersUseCase := getOrders{
 		orderRepository: orderRepository,

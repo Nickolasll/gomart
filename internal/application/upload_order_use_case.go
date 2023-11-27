@@ -1,8 +1,6 @@
 package application
 
 import (
-	"sync"
-
 	"github.com/Nickolasll/gomart/internal/domain"
 	"github.com/google/uuid"
 )
@@ -11,7 +9,6 @@ type uploadOrder struct {
 	orderRepository         domain.OrderRepositoryInterface
 	userAggregateRepository domain.UserAggregateRepositoryInterface
 	ch                      chan<- domain.Order
-	wg                      *sync.WaitGroup
 }
 
 func (u uploadOrder) Execute(userID uuid.UUID, number string) error {
@@ -40,7 +37,6 @@ func (u uploadOrder) Execute(userID uuid.UUID, number string) error {
 	if err != nil {
 		return err
 	}
-	u.wg.Add(1)
 	u.ch <- newOrder
 	return nil
 }
