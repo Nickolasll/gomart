@@ -34,11 +34,11 @@ func (w Worker) Serve() {
 	defer w.wg.Done()
 	for order := range w.ch {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
 		for processed := false; !processed; processed = w.routine(order) {
 			select {
 			case <-ctx.Done():
 				w.log.Error("Processing order time out")
+				cancel()
 				continue
 			default:
 			}
