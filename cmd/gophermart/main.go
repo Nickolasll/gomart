@@ -17,7 +17,6 @@ func main() {
 	db, err := infrastructure.EstablishConnection(cfg.DatabaseURI)
 	if err != nil {
 		log.Fatal(err)
-		panic(err)
 	}
 	userAggregateRepository := infrastructure.UserAggregateRepository{DB: *db}
 	orderRepository := infrastructure.OrderRepository{DB: *db}
@@ -27,7 +26,6 @@ func main() {
 	err = userAggregateRepository.Init()
 	if err != nil {
 		log.Fatal(err)
-		panic(err)
 	}
 	jose := application.JOSEService{TokenExp: cfg.TokenExp, SecretKey: cfg.SecretKey}
 	app := application.CreateApplication(
@@ -43,7 +41,6 @@ func main() {
 	err = http.ListenAndServe(cfg.ServerEndpoint, mux)
 	if err != nil {
 		log.Fatal(err)
-		panic(err)
 	}
 	os.Exit(app.ShutDown())
 }
