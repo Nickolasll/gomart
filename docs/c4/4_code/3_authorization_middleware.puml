@@ -1,0 +1,32 @@
+@startuml
+!theme vibrant
+title: 3. Авторизация пользователя
+skinparam maxMessageSize 300
+autonumber
+
+participant "Клиент" as client
+participant "Middleware" as middleware
+participant "Служба JavaScript Object Signing and Encryption" as jose
+participant "Обработчик запроса" as handler
+
+client -> middleware ++ : Отправляет запрос, доступный только аутентифицированным пользователям
+note over client, handler
+    GET /api/user/request HTTP/1.1
+    Content-Type: application/json 
+end note
+
+middleware -> middleware: Проверяет наличие HTTP-заголовка Authorization
+opt Заголовок не найден или в заголовке нет значения
+    middleware --> client: HTTP 401 Unauthorized
+end
+
+middleware -> jose ++: Проверяет валидность JWT
+return Результат проверки, JWT Claims
+opt Срок действия JWT истек или значение невалидно
+    middleware --> client: HTTP 401 Unauthorized
+end
+
+middleware -> middleware: Извлекает из JWT Claims уникальный идентификатор пользователя
+middleware -> handler ++ : Вызывает обработчик с уникальным идентификатором пользователя
+deactivate middleware
+@enduml

@@ -1,0 +1,52 @@
+@startuml
+!theme vibrant
+title: 6. Получение списка загруженных номеров заказов
+skinparam maxMessageSize 300
+autonumber
+
+participant "Клиент" as client
+participant "Обработчик запроса" as handler
+participant "Сервис заказов" as order
+database "postgres" as db
+
+client -> handler ++ : Отправляет запрос на получение списка заказов
+note over client, handler
+    GET /api/user/orders HTTP/1.1
+end note
+
+group middleware
+note over client, handler: 3. Авторизация пользователя
+end group
+
+handler -> order ++ : Вызывает поведение чтения списка заказов по уникальному идентификатору пользователя
+order -> db ++ : Запрашивает заказы по уникальному идентификатору пользователя
+return результат запроса
+
+order -> order: Проверка результата запроса
+opt Результат запроса == null
+    order --> handler: Пустой список заказов
+    handler --> client: HTTP 204 No content
+end
+
+return Список заказов
+handler --> handler: Дамп списка заказов в JSON
+return HTTP 200 Ok
+note over client, handler
+    200 OK HTTP/1.1
+    Content-Type: application/json
+
+    [
+        {
+            "number": "9278923470",
+            "status": "PROCESSED",
+            "accrual": 500,
+            "uploaded_at": "2020-12-10T15:15:45+03:00"
+        },
+        {
+            "number": "12345678903",
+            "status": "INVALID",
+            "uploaded_at": "2020-12-10T15:12:01+03:00"
+        }
+    ]
+end note
+@enduml

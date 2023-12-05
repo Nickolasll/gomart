@@ -1,0 +1,57 @@
+@startuml
+!theme vibrant
+title: 4. Загрузка номера заказа
+skinparam maxMessageSize 300
+autonumber
+
+participant "Клиент" as client
+participant "Обработчик запроса" as handler
+participant "Сервис заказов" as order
+database "postgres" as db
+queue "Очередь" as queue
+
+client -> handler ++ : Отправляет запрос на загрузку заказа на обработку
+note over client, handler
+    POST /api/user/orders HTTP/1.1
+    Content-Type: text/plain
+
+    12345678903  
+end note
+
+group middleware
+note over client, handler: 3. Авторизация пользователя
+end group
+
+handler -> handler : Парсит JSON и валидирует формат входных данных из тела запроса
+opt Формат некорректен
+    handler --> client: HTTP 400 Bad request
+end
+
+handler -> order ++ : Вызывает поведение загрузки нового заказа
+order -> order: Валидация номера заказа алгоритмом Луна
+opt Номер заказа невалиден
+    order --> handler: Номер невалиден
+    handler --> client: HTTP 422 Unprocessable entity
+end
+
+order -> db ++ : Запрашивает заказ с полученным номером
+return результат запроса
+
+order -> order: Проверка результата запроса
+opt Результат запроса != null
+    alt идентификатор пользователя из заказа совпадает
+        order --> handler: Пользователь уже загрузил этот заказ
+        handler --> client: HTTP 200 Ok
+    else идентификатор пользователя не совпадает
+        order --> handler: Номер заказа уже был загружен другим пользователем
+        handler --> client: HTTP 409 Conflict
+    end
+end
+
+order -> db ++: Сохраняет заказ со статусом NEW
+deactivate db
+order -> queue ++: Помещает заказ в очередь для обработки
+deactivate queue
+return Заказ принят на обработку
+return HTTP 202 Accepted
+@enduml
